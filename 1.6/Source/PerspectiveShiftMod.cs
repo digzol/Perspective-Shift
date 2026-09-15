@@ -143,27 +143,43 @@ namespace PerspectiveShift
                     settings.disableDoubleClickEquip = d.disableDoubleClickEquip;
                     settings.disableDoubleClickEat = d.disableDoubleClickEat;
                     settings.disableDoubleClickDrug = d.disableDoubleClickDrug;
+                    settings.disableDoubleClickRead = d.disableDoubleClickRead;
                     settings.weaponTooltips = d.weaponTooltips;
                     settings.apparelTooltips = d.apparelTooltips;
                     settings.eatTooltips = d.eatTooltips;
                     settings.drugTooltips = d.drugTooltips;
+                    settings.bookTooltips = d.bookTooltips;
                     settings.harvestTooltips = d.harvestTooltips;
+                    settings.billTooltips = d.billTooltips;
                     break;
 
                 case SettingsTab.Cursors:
+                    settings.customCursors = d.customCursors;
                     settings.haulingCursor = d.haulingCursor;
                     settings.mineCursor = d.mineCursor;
+                    settings.smoothCursor = d.smoothCursor;
                     settings.buildCursor = d.buildCursor;
                     settings.roofCursor = d.roofCursor;
                     settings.chopCursor = d.chopCursor;
                     settings.harvestCursor = d.harvestCursor;
                     settings.cutCursor = d.cutCursor;
+                    settings.plantCursor = d.plantCursor;
+                    settings.plowCursor = d.plowCursor;
                     settings.traverseCursor = d.traverseCursor;
                     settings.reloadCursors = d.reloadCursors;
                     settings.openCursor = d.openCursor;
                     settings.sleepCursor = d.sleepCursor;
                     settings.recreationCursor = d.recreationCursor;
                     settings.researchCursor = d.researchCursor;
+                    settings.cookCursor = d.cookCursor;
+                    settings.butcherCursor = d.butcherCursor;
+                    settings.stonecuttingCursor = d.stonecuttingCursor;
+                    settings.brewCursor = d.brewCursor;
+                    settings.smeltCursor = d.smeltCursor;
+                    settings.tailorCursor = d.tailorCursor;
+                    settings.tameCursor = d.tameCursor;
+                    settings.slaughterCursor = d.slaughterCursor;
+                    settings.releaseToWildCursor = d.releaseToWildCursor;
                     break;
 
                 case SettingsTab.Movement:
@@ -188,6 +204,7 @@ namespace PerspectiveShift
                     settings.workSpeedMultiplier = d.workSpeedMultiplier;
                     settings.shootAccuracyMultiplier = d.shootAccuracyMultiplier;
                     settings.fishingMinigame = d.fishingMinigame;
+                    settings.instantEquip = d.instantEquip;
                     settings.sleepingPreventsVision = d.sleepingPreventsVision;
                     settings.disallowOtherMapsInAuthentic = d.disallowOtherMapsInAuthentic;
                     settings.totalFreedom = d.totalFreedom;
@@ -237,6 +254,7 @@ namespace PerspectiveShift
             listing.CheckboxLabeled("PS_DisableDoubleClickEquip".Translate(), ref settings.disableDoubleClickEquip, "PS_DisableDoubleClickEquipDesc".Translate());
             listing.CheckboxLabeled("PS_DisableDoubleClickEat".Translate(), ref settings.disableDoubleClickEat, "PS_DisableDoubleClickEatDesc".Translate());
             listing.CheckboxLabeled("PS_DisableDoubleClickDrug".Translate(), ref settings.disableDoubleClickDrug, "PS_DisableDoubleClickDrugDesc".Translate());
+            listing.CheckboxLabeled("PS_DisableDoubleClickRead".Translate(), ref settings.disableDoubleClickRead, "PS_DisableDoubleClickReadDesc".Translate());
             if (!settings.disableDoubleClickEquip)
             {
                 listing.CheckboxLabeled("PS_WeaponTooltips".Translate(), ref settings.weaponTooltips, "PS_WeaponTooltipsDesc".Translate());
@@ -250,24 +268,45 @@ namespace PerspectiveShift
             {
                 listing.CheckboxLabeled("PS_DrugTooltips".Translate(), ref settings.drugTooltips, "PS_DrugTooltipsDesc".Translate());
             }
+            if (!settings.disableDoubleClickRead)
+            {
+                listing.CheckboxLabeled("PS_BookTooltips".Translate(), ref settings.bookTooltips, "PS_BookTooltipsDesc".Translate());
+            }
             listing.CheckboxLabeled("PS_HarvestTooltips".Translate(), ref settings.harvestTooltips, "PS_HarvestTooltipsDesc".Translate());
+            listing.CheckboxLabeled("PS_BillTooltips".Translate(), ref settings.billTooltips, "PS_BillTooltipsDesc".Translate());
         }
 
         private void DoCursorsTab(Listing_Standard listing)
         {
+            listing.CheckboxLabeled("PS_CustomCursors".Translate(), ref settings.customCursors, "PS_CustomCursorsDesc".Translate());
+            if (!settings.customCursors) return;
+
+            listing.GapLine();
             listing.CheckboxLabeled("PS_HaulingCursor".Translate(), ref settings.haulingCursor, "PS_HaulingCursorDesc".Translate());
             listing.CheckboxLabeled("PS_MineCursor".Translate(), ref settings.mineCursor, "PS_MineCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_SmoothCursor".Translate(), ref settings.smoothCursor, "PS_SmoothCursorDesc".Translate());
             listing.CheckboxLabeled("PS_BuildCursor".Translate(), ref settings.buildCursor, "PS_BuildCursorDesc".Translate());
             listing.CheckboxLabeled("PS_RoofCursor".Translate(), ref settings.roofCursor, "PS_RoofCursorDesc".Translate());
             listing.CheckboxLabeled("PS_ChopCursor".Translate(), ref settings.chopCursor, "PS_ChopCursorDesc".Translate());
             listing.CheckboxLabeled("PS_HarvestCursor".Translate(), ref settings.harvestCursor, "PS_HarvestCursorDesc".Translate());
             listing.CheckboxLabeled("PS_CutCursor".Translate(), ref settings.cutCursor, "PS_CutCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_PlantCursor".Translate(), ref settings.plantCursor, "PS_PlantCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_PlowCursor".Translate(), ref settings.plowCursor, "PS_PlowCursorDesc".Translate());
             listing.CheckboxLabeled("PS_TraverseCursor".Translate(), ref settings.traverseCursor, "PS_TraverseCursorDesc".Translate());
             listing.CheckboxLabeled("PS_ReloadCursors".Translate(), ref settings.reloadCursors, "PS_ReloadCursorsDesc".Translate());
             listing.CheckboxLabeled("PS_OpenCursor".Translate(), ref settings.openCursor, "PS_OpenCursorDesc".Translate());
             listing.CheckboxLabeled("PS_SleepCursor".Translate(), ref settings.sleepCursor, "PS_SleepCursorDesc".Translate());
             listing.CheckboxLabeled("PS_RecreationCursor".Translate(), ref settings.recreationCursor, "PS_RecreationCursorDesc".Translate());
             listing.CheckboxLabeled("PS_ResearchCursor".Translate(), ref settings.researchCursor, "PS_ResearchCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_CookCursor".Translate(), ref settings.cookCursor, "PS_CookCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_ButcherCursor".Translate(), ref settings.butcherCursor, "PS_ButcherCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_StonecuttingCursor".Translate(), ref settings.stonecuttingCursor, "PS_StonecuttingCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_BrewCursor".Translate(), ref settings.brewCursor, "PS_BrewCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_SmeltCursor".Translate(), ref settings.smeltCursor, "PS_SmeltCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_TailorCursor".Translate(), ref settings.tailorCursor, "PS_TailorCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_TameCursor".Translate(), ref settings.tameCursor, "PS_TameCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_SlaughterCursor".Translate(), ref settings.slaughterCursor, "PS_SlaughterCursorDesc".Translate());
+            listing.CheckboxLabeled("PS_ReleaseToWildCursor".Translate(), ref settings.releaseToWildCursor, "PS_ReleaseToWildCursorDesc".Translate());
         }
 
         private void DoMovementTab(Listing_Standard listing)
@@ -332,6 +371,7 @@ namespace PerspectiveShift
             {
                 listing.CheckboxLabeled("PS_FishingMinigame".Translate(), ref settings.fishingMinigame, "PS_FishingMinigameDesc".Translate());
             }
+            listing.CheckboxLabeled("PS_InstantEquip".Translate(), ref settings.instantEquip, "PS_InstantEquipDesc".Translate());
             listing.CheckboxLabeled("PS_SleepingPreventsVision".Translate(), ref settings.sleepingPreventsVision, "PS_SleepingPreventsVisionDesc".Translate());
             listing.CheckboxLabeled("PS_DisallowOtherMapsInAuthentic".Translate(), ref settings.disallowOtherMapsInAuthentic, "PS_DisallowOtherMapsInAuthenticDesc".Translate());
             listing.CheckboxLabeled("PS_TotalFreedom".Translate(), ref settings.totalFreedom, "PS_TotalFreedomDesc".Translate());

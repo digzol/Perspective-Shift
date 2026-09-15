@@ -1,4 +1,5 @@
 using RimWorld;
+using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace PerspectiveShift
         private IntVec3 equipHintPawnCell = IntVec3.Invalid;
         private string equipHintTitle;
         private string equipHintQuality;
-        private readonly HintStat[] equipHintStats = new HintStat[4];
+        private readonly HintStat[] equipHintStats = new HintStat[6];
         private int equipHintStatCount;
         private Vector2 equipHintLabelSize;
         private Vector2 equipHintTitleSize;
@@ -44,6 +45,15 @@ namespace PerspectiveShift
         private int equipHintStatCols;
         private int equipHintStatRows;
         private float equipHintStatRowH;
+        private Thing equipHintCarried;
+        private int equipHintStamp;
+        private Bill equipHintBill;
+        private ThingDef equipHintTitleDef;
+        private ThingDef equipHintTitleStuff;
+        private Texture2D equipHintTitleTex;
+        private Thing equipHintTitleThing;
+        private Matrix4x4 equipHintBaseMatrix;
+        private Vector2 equipHintPivot;
 
         private const float MinAvatarUIScale = 0.5f;
         private const float MaxAvatarUIScale = 1.5f;
@@ -72,6 +82,9 @@ namespace PerspectiveShift
 
         private static Texture2D _ingestIcon;
         private static Texture2D IngestIcon => _ingestIcon ??= ContentFinder<Texture2D>.Get("Storage/IngestIcon");
+
+        private static Texture2D _readIcon;
+        private static Texture2D ReadIcon => _readIcon ??= ContentFinder<Texture2D>.Get("Storage/Read");
 
         private static Texture2D _arrowUpIcon;
         private static Texture2D ArrowUpIcon => _arrowUpIcon ??= ContentFinder<Texture2D>.Get("UI/Buttons/ReorderUp");
@@ -670,15 +683,30 @@ namespace PerspectiveShift
         {
             if (Event.current.type != EventType.Repaint) return;
 
-            if (!ShowWeaponHints && !ShowApparelHints && !ShowEatHints && !PerspectiveShiftMod.settings.harvestTooltips) return;
-            if (mouseOverUI || CarriedThing != null || pawn.Map == null) return;
+            bool billHints = ShowBillHints;
+            if (!billHints && !ShowWeaponHints && !ShowApparelHints && !ShowEatHints && !ShowDrugHints && !ShowBookHints && !PerspectiveShiftMod.settings.harvestTooltips) return;
+            var carried = CarriedThing;
+            if (mouseOverUI || pawn.Map == null || (carried != null && !billHints)) return;
 
             var cell = UI.MouseCell();
-            if (cell != equipHintCell || pawn.Position != equipHintPawnCell)
+            bool rebuild = cell != equipHintCell || pawn.Position != equipHintPawnCell || carried != equipHintCarried;
+            if (billHints)
+            {
+                MouseOverJobTarget();
+                rebuild |= jobCursorStamp != equipHintStamp && (equipHintBill != null || jobCursorBill != null);
+            }
+            else
+            {
+                rebuild |= equipHintBill != null;
+            }
+
+            if (rebuild)
             {
                 equipHintCell = cell;
                 equipHintPawnCell = pawn.Position;
-                equipHintThing = FindHintTargetAt(cell, out equipHintLabel, out equipHintIcon);
+                equipHintCarried = carried;
+                equipHintStamp = jobCursorStamp;
+                equipHintThing = FindHintTargetAt(cell, carried, billHints, out equipHintLabel, out equipHintIcon);
                 MeasureHintLayout();
             }
 
@@ -698,10 +726,13 @@ namespace PerspectiveShift
 
             float titleRowH = 0f;
             float statsBlockH = 0f;
+            bool titleIcon = equipHintTitleDef != null || equipHintTitleTex != null || equipHintTitleThing != null;
+            float titleIconSize = equipHintTitleSize.y;
+            float titleIconAdvance = titleIcon ? titleIconSize + 4f : 0f;
             if (detailed)
             {
                 titleRowH = equipHintTitleSize.y + 2f;
-                float titleW = equipHintTitleSize.x + (equipHintQuality != null ? equipHintQualitySize.x + 6f : 0f);
+                float titleW = titleIconAdvance + equipHintTitleSize.x + (equipHintQuality != null ? equipHintQualitySize.x + 6f : 0f);
                 float statsW = 0f;
                 for (int c = 0; c < equipHintStatCols; c++)
                 {
@@ -714,7 +745,7 @@ namespace PerspectiveShift
             }
 
             float boxWidth = contentW + pad * 2f;
-            var anchor = (thing.DrawPos + new Vector3(0f, 0f, 0.35f)).MapToUIPosition();
+            var anchor = (thing.DrawPos + new Vector3(0f, 0f, thing is Building ? thing.RotatedSize.z * 0.5f : 0.35f)).MapToUIPosition();
             const float leaderLength = 10f;
             var boxRect = new Rect(anchor.x - boxWidth / 2f, anchor.y - leaderLength - boxHeight, boxWidth, boxHeight);
             boxRect.x = Mathf.Clamp(boxRect.x, 4f, Mathf.Max(4f, UI.screenWidth - boxWidth - 4f));
@@ -722,6 +753,8 @@ namespace PerspectiveShift
 
             Matrix4x4 prevMatrix = GUI.matrix;
             var pivot = new Vector3(anchor.x, anchor.y, 0f);
+            equipHintBaseMatrix = prevMatrix;
+            equipHintPivot = anchor;
             GUI.matrix = prevMatrix
                 * Matrix4x4.TRS(pivot, Quaternion.identity, Vector3.one)
                 * Matrix4x4.Scale(new Vector3(HintScale, HintScale, 1f))
@@ -738,14 +771,19 @@ namespace PerspectiveShift
 
             if (detailed)
             {
+                if (titleIcon)
+                {
+                    DrawHintIcon(new Rect(x, y + (titleRowH - titleIconSize) / 2f, titleIconSize, titleIconSize), equipHintTitleDef, equipHintTitleStuff, equipHintTitleTex, equipHintTitleThing);
+                }
+                float titleX = x + titleIconAdvance;
                 Text.Font = GameFont.Small;
                 GUI.color = HintTitleColor;
-                Widgets.Label(new Rect(x, y, equipHintTitleSize.x, titleRowH), equipHintTitle);
+                Widgets.Label(new Rect(titleX, y, equipHintTitleSize.x, titleRowH), equipHintTitle);
                 if (equipHintQuality != null)
                 {
                     Text.Font = GameFont.Tiny;
                     GUI.color = ColoredText.SubtleGrayColor;
-                    Widgets.Label(new Rect(x + equipHintTitleSize.x + 6f, y, equipHintQualitySize.x, titleRowH), equipHintQuality);
+                    Widgets.Label(new Rect(titleX + equipHintTitleSize.x + 6f, y, equipHintQualitySize.x, titleRowH), equipHintQuality);
                 }
                 GUI.color = Color.white;
                 y += titleRowH + 2f;
@@ -796,8 +834,15 @@ namespace PerspectiveShift
             float labelW = equipHintColLabelW[col];
             float valueW = equipHintColValueW[col];
 
+            float iconAdvance = 0f;
+            if (stat.icon != null)
+            {
+                DrawHintIcon(new Rect(x, y, rowHeight, rowHeight), null, null, null, stat.icon);
+                iconAdvance = rowHeight + 3f;
+            }
+
             GUI.color = ColoredText.SubtleGrayColor;
-            Widgets.Label(new Rect(x, y, labelW, rowHeight), stat.label);
+            Widgets.Label(new Rect(x + iconAdvance, y, labelW - iconAdvance, rowHeight), stat.label);
 
             GUI.color = Color.white;
             Widgets.Label(new Rect(x + labelW + 6f, y, valueW, rowHeight), stat.value);
@@ -848,7 +893,8 @@ namespace PerspectiveShift
                 int col = i / equipHintStatRows;
                 var labelSize = MeasureHintText(equipHintStats[i].label);
                 var valueSize = MeasureHintText(equipHintStats[i].value);
-                equipHintColLabelW[col] = Mathf.Max(equipHintColLabelW[col], labelSize.x);
+                float labelW = labelSize.x + (equipHintStats[i].icon != null ? labelSize.y + 3f : 0f);
+                equipHintColLabelW[col] = Mathf.Max(equipHintColLabelW[col], labelW);
                 equipHintColValueW[col] = Mathf.Max(equipHintColValueW[col], valueSize.x);
                 equipHintStatRowH = Mathf.Max(equipHintStatRowH, Mathf.Max(labelSize.y, valueSize.y));
                 if (equipHintStats[i].sign != 0)
@@ -866,11 +912,57 @@ namespace PerspectiveShift
         {
             if (text.NullOrEmpty()) return Vector2.zero;
             var size = Text.CalcSize(text);
-            size.x += 2f;
+            size.x = Mathf.Ceil(size.x * 1.06f) + 2f;
             return size;
         }
 
-        private Thing FindHintTargetAt(IntVec3 cell, out string label, out Texture2D icon)
+        private void DrawHintIcon(Rect rect, ThingDef def, ThingDef stuff, Texture2D tex, Thing thing)
+        {
+            if (thing != null && thing.Destroyed) thing = null;
+            if (def == null && tex == null && thing == null) return;
+
+            var scaled = GUI.matrix;
+            var prevColor = GUI.color;
+            GUI.matrix = equipHintBaseMatrix;
+            GUI.color = Color.white;
+            rect = new Rect(equipHintPivot + (rect.position - equipHintPivot) * HintScale, rect.size * HintScale);
+            if (def != null) Widgets.ThingIcon(rect, def, stuff);
+            else if (tex != null) Widgets.DrawTextureFitted(rect, tex, 1f);
+            else Widgets.ThingIcon(rect, thing);
+            GUI.matrix = scaled;
+            GUI.color = prevColor;
+        }
+
+        private Thing FindHintTargetAt(IntVec3 cell, Thing carried, bool billHints, out string label, out Texture2D icon)
+        {
+            equipHintBill = null;
+            equipHintTitleDef = null;
+            equipHintTitleStuff = null;
+            equipHintTitleTex = null;
+            equipHintTitleThing = null;
+
+            if (carried == null)
+            {
+                var item = FindItemHintAt(cell, out label, out icon);
+                if (item != null) return item;
+            }
+
+            label = null;
+            icon = null;
+            var bill = jobCursorBill;
+            if (billHints && bill != null && !bill.DeletedOrDereferenced && bill.billStack?.billGiver is Thing bench && bench.Spawned)
+            {
+                BuildBillHintStats(bench, bill, carried != null, out label, out icon);
+                return bench;
+            }
+
+            equipHintTitle = null;
+            equipHintQuality = null;
+            equipHintStatCount = 0;
+            return null;
+        }
+
+        private Thing FindItemHintAt(IntVec3 cell, out string label, out Texture2D icon)
         {
             label = null;
             icon = null;
@@ -880,6 +972,7 @@ namespace PerspectiveShift
             bool apparelHints = ShowApparelHints;
             bool eatHints = ShowEatHints;
             bool drugHints = ShowDrugHints;
+            bool bookHints = ShowBookHints;
             var things = cell.GetThingList(pawn.Map);
             for (int i = 0; i < things.Count; i++)
             {
@@ -911,6 +1004,14 @@ namespace PerspectiveShift
                     BuildFoodHintStats(thing);
                     return thing;
                 }
+
+                if (bookHints && thing is Book book && TryMakeReadJob(pawn, book, out _))
+                {
+                    label = "PS_DoubleClickToRead".Translate();
+                    icon = ReadIcon;
+                    BuildBookHintStats(book);
+                    return thing;
+                }
             }
 
             if (PerspectiveShiftMod.settings.harvestTooltips
@@ -936,7 +1037,7 @@ namespace PerspectiveShift
         {
             var job = pawn.CurJob;
             if (job == null) return false;
-            if (job.def != JobDefOf.Wear && job.def != JobDefOf.Equip && job.def != JobDefOf.Ingest && job.def != JobDefOf.Harvest) return false;
+            if (job.def != JobDefOf.Wear && job.def != JobDefOf.Equip && job.def != JobDefOf.Ingest && job.def != JobDefOf.Harvest && job.def != JobDefOf.Reading && job.def != ModCompatibility.AlphaBookReadingJob && job.def != JobDefOf.DoBill) return false;
             return job.targetA.Thing == thing;
         }
 
@@ -975,6 +1076,18 @@ namespace PerspectiveShift
                 return settings.drugTooltips && !settings.disableDoubleClickDrug;
             }
         }
+
+        private static bool ShowBookHints
+        {
+            get
+            {
+                var settings = PerspectiveShiftMod.settings;
+                return settings.bookTooltips && !settings.disableDoubleClickRead;
+            }
+        }
+
+        private bool ShowBillHints => PerspectiveShiftMod.settings.billTooltips && !pawn.Drafted && !State.ControlsFrozen
+            && !Find.Targeter.IsTargeting && !WorldRendererUtility.WorldSelected;
 
         private void DrawCornerRotateButton()
         {

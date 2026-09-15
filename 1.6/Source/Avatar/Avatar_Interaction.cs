@@ -86,7 +86,10 @@ namespace PerspectiveShift
         {
             if (!PerspectiveShiftMod.settings.disableDoubleClickEquip && Event.current.clickCount == 2 && TryMakeWearOrEquipJob(pawn, carriedThing, out Job job))
             {
-                return pawn.jobs.TryTakeOrderedJob(job);
+                if (!PerspectiveShiftMod.settings.instantEquip) return pawn.jobs.TryTakeOrderedJob(job);
+                JobMaker.ReturnToPool(job);
+                InstantWearOrEquip(carriedThing);
+                return true;
             }
 
             if (!PerspectiveShiftMod.settings.disableDoubleClickDrug && Event.current.clickCount == 2 && TryMakeDrugIngestJob(pawn, carriedThing, out Job drugJob))
@@ -97,6 +100,11 @@ namespace PerspectiveShift
             if (!PerspectiveShiftMod.settings.disableDoubleClickEat && Event.current.clickCount == 2 && TryMakeIngestJob(pawn, carriedThing, out Job ingestJob))
             {
                 return pawn.jobs.TryTakeOrderedJob(ingestJob);
+            }
+
+            if (!PerspectiveShiftMod.settings.disableDoubleClickRead && Event.current.clickCount == 2 && TryMakeReadJob(pawn, carriedThing, out Job readJob))
+            {
+                return pawn.jobs.TryTakeOrderedJob(readJob);
             }
 
             if (!itemInRange) return false;
@@ -525,11 +533,17 @@ namespace PerspectiveShift
             {
                 foreach (var bill in billGiver.BillStack)
                 {
-                    if (bill.ShouldDoNow() && bill.IsFixedOrAllowedIngredient(carriedThing))
+                    if (bill.ShouldDoNow() && BillWantsCarried(bill, carriedThing))
                     {
+                        var unrelated = new List<Bill>();
+                        foreach (var other in billGiver.BillStack)
+                        {
+                            if (!other.suspended && !BillWantsCarried(other, carriedThing)) unrelated.Add(other);
+                        }
+
                         if (pawn.carryTracker.TryDropCarriedThing(pawn.Position, ThingPlaceMode.Near, out Thing droppedItem))
                         {
-                            TryStartBillJob(billGiver);
+                            TryStartBillJob(billGiver, unrelated);
                             return true;
                         }
                     }
@@ -538,7 +552,23 @@ namespace PerspectiveShift
             return false;
         }
 
-        private void TryStartBillJob(IBillGiver billGiver)
+        private bool BillWantsCarried(Bill bill, Thing carried)
+        {
+            if (carried is not UnfinishedThing uft) return bill.IsFixedOrAllowedIngredient(carried);
+            if (uft.Creator != pawn || bill is not Bill_ProductionWithUft uftBill) return false;
+
+            var bound = uft.BoundBill;
+            if (bound != null) return bound == uftBill;
+            if (uftBill.BoundUft != null || uftBill.recipe != uft.Recipe) return false;
+
+            for (int i = 0; i < uft.ingredients.Count; i++)
+            {
+                if (!uftBill.IsFixedOrAllowedIngredient(uft.ingredients[i].def)) return false;
+            }
+            return true;
+        }
+
+        private void TryStartBillJob(IBillGiver billGiver, List<Bill> unrelated)
         {
             Thing billGiverThing = billGiver as Thing;
             if (billGiverThing == null) return;
@@ -556,7 +586,16 @@ namespace PerspectiveShift
 
             if (workGiver != null)
             {
-                var job = workGiver.JobOnThing(pawn, billGiverThing, forced: true);
+                Job job;
+                for (int i = 0; i < unrelated.Count; i++) unrelated[i].suspended = true;
+                try
+                {
+                    job = workGiver.JobOnThing(pawn, billGiverThing, forced: true);
+                }
+                finally
+                {
+                    for (int i = 0; i < unrelated.Count; i++) unrelated[i].suspended = false;
+                }
                 if (job != null)
                 {
                     pawn.jobs.TryTakeOrderedJob(job);
@@ -778,6 +817,12 @@ namespace PerspectiveShift
             return true;
         }
 
+        private bool IsSmoothingWallAt(IntVec3 cell)
+        {
+            var job = pawn.jobs?.curJob;
+            return job != null && job.def == JobDefOf.SmoothWall && job.targetA.Cell == cell;
+        }
+
         private bool TryExecuteDesignatorlessFallback(IntVec3 clickCell, bool itemInRange)
         {
             if (Prefs.DevMode) LogHarvestGate(clickCell, itemInRange);
@@ -798,7 +843,7 @@ namespace PerspectiveShift
             }
 
             var mineable = clickCell.GetFirstMineable(pawn.Map);
-            if (mineable != null && !pawn.WorkTypeIsDisabled(WorkTypeDefOf.Mining) && pawn.CanReserve(mineable))
+            if (mineable != null && !IsSmoothingWallAt(clickCell) && !pawn.WorkTypeIsDisabled(WorkTypeDefOf.Mining) && pawn.CanReserve(mineable))
             {
                 var job = JobMaker.MakeJob(JobDefOf.Mine, mineable, 20000, checkOverrideOnExpiry: true);
                 job.ignoreDesignations = true;
@@ -1011,7 +1056,7 @@ namespace PerspectiveShift
             if (thing.def.hasInteractionCell && thing.InteractionCell == pawn.Position)
                 return true;
 
-            if (thing.def.building?.watchBuildingStandDistanceRange != null)
+            if (IsWatchBuilding(thing.def))
             {
                 var watchCells = WatchBuildingUtility.CalculateWatchCells(thing.def, thing.Position, thing.Rotation, pawn.Map);
                 if (watchCells.Contains(pawn.Position))
@@ -1028,6 +1073,23 @@ namespace PerspectiveShift
             }
 
             return false;
+        }
+
+        private static HashSet<ThingDef> watchBuildingDefs;
+
+        private static bool IsWatchBuilding(ThingDef def)
+        {
+            if (watchBuildingDefs == null)
+            {
+                watchBuildingDefs = new HashSet<ThingDef>();
+                var joyGivers = DefDatabase<JoyGiverDef>.AllDefsListForReading;
+                for (int i = 0; i < joyGivers.Count; i++)
+                {
+                    if (joyGivers[i].thingDefs != null && joyGivers[i].Worker is JoyGiver_WatchBuilding)
+                        watchBuildingDefs.UnionWith(joyGivers[i].thingDefs);
+                }
+            }
+            return watchBuildingDefs.Contains(def);
         }
 
         private bool JobTargetsInRange(Job job)
@@ -1086,6 +1148,17 @@ namespace PerspectiveShift
             return true;
         }
 
+        public static bool TryMakeReadJob(Pawn pawn, Thing item, out Job job)
+        {
+            job = null;
+            if (item is not Book book) return false;
+            if (!BookUtility.CanReadBook(book, pawn, out _)) return false;
+
+            job = JobMaker.MakeJob(ModCompatibility.IsAlphaBook(book) ? ModCompatibility.AlphaBookReadingJob : JobDefOf.Reading, book);
+            job.playerForced = true;
+            return true;
+        }
+
         public static bool TryMakeDrugIngestJob(Pawn pawn, Thing item, out Job job)
         {
             job = null;
@@ -1130,10 +1203,20 @@ namespace PerspectiveShift
                     return false;
                 }
 
+                if (pawn.apparel == null || pawn.apparel.WouldReplaceLockedApparel(apparel) || (pawn.IsMutant && pawn.mutant.Def.disableApparel))
+                {
+                    return false;
+                }
+
+                if (!EquipmentUtility.CanEquip(apparel, pawn, out _))
+                {
+                    return false;
+                }
+
                 job = JobMaker.MakeJob(JobDefOf.Wear, item);
                 return true;
             }
-            else if (item is ThingWithComps thingWithComps && thingWithComps.def.equipmentType == EquipmentType.Primary)
+            else if (item is ThingWithComps thingWithComps && thingWithComps.def.equipmentType == EquipmentType.Primary && pawn.equipment != null)
             {
                 if (thingWithComps.def.IsWeapon && pawn.WorkTagIsDisabled(WorkTags.Violent))
                 {
@@ -1151,6 +1234,37 @@ namespace PerspectiveShift
                 return true;
             }
             return false;
+        }
+
+        private void InstantWearOrEquip(Thing item)
+        {
+            var map = pawn.Map;
+            var taken = item.SplitOff(1);
+            map.reservationManager.ReleaseAllForTarget(taken);
+            var at = new TargetInfo(pawn.Position, map);
+            if (taken is Apparel apparel)
+            {
+                pawn.apparel.Wear(apparel);
+                if (apparel.Wearer != pawn)
+                {
+                    GenPlace.TryPlaceThing(apparel, pawn.Position, map, ThingPlaceMode.Near);
+                    return;
+                }
+                pawn.outfits?.forcedHandler.SetForced(apparel, true);
+                var sound = apparel.def.apparel.soundWear;
+                if (sound == null || sound.sustain) sound = apparel.def.soundInteract;
+                if (sound != null && !sound.sustain) sound.PlayOneShot(at);
+                return;
+            }
+            var eq = (ThingWithComps)taken;
+            pawn.equipment.MakeRoomFor(eq);
+            pawn.equipment.AddEquipment(eq);
+            if (pawn.equipment.Primary != eq)
+            {
+                GenPlace.TryPlaceThing(eq, pawn.Position, map, ThingPlaceMode.Near);
+                return;
+            }
+            eq.def.soundInteract?.PlayOneShot(at);
         }
     }
 }

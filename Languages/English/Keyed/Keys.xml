@@ -69,6 +69,8 @@
 
     <PS_EnableDamageScreenEffect>Enable damage screen effect</PS_EnableDamageScreenEffect>
     <PS_EnableDamageScreenEffectDesc>Flashes a red overlay on the screen briefly when your controlled character takes damage.</PS_EnableDamageScreenEffectDesc>
+    <PS_InstantEquip>Instant double-click equip</PS_InstantEquip>
+    <PS_InstantEquipDesc>Double-clicking a carried weapon or apparel equips or wears it immediately, skipping the equip job and its wear delay. Replaced gear is dropped at your feet.</PS_InstantEquipDesc>
     <PS_SleepingPreventsVision>Sleeping prevents vision</PS_SleepingPreventsVision>
     <PS_SleepingPreventsVisionDesc>While the character you are inhabiting is asleep or unconscious, the world fades to black until they wake up. Your interface stays visible.</PS_SleepingPreventsVisionDesc>
     <PS_DisallowOtherMapsInAuthentic>Disallow seeing other maps in authentic style</PS_DisallowOtherMapsInAuthentic>
@@ -78,14 +80,20 @@
     <PS_WeaponTooltipsDesc>Hovering a weapon within reach shows its name, quality, and how its DPS and armor penetration compare with what you have equipped.</PS_WeaponTooltipsDesc>
     <PS_ApparelTooltips>Apparel tooltips</PS_ApparelTooltips>
     <PS_ApparelTooltipsDesc>Hovering apparel within reach shows its name, quality, and how its armor and insulation compare with whatever it would replace.</PS_ApparelTooltipsDesc>
+    <PS_CustomCursors>Custom cursors</PS_CustomCursors>
+    <PS_CustomCursorsDesc>Master switch for every cursor on this tab. Turn it off to keep the normal mouse pointer instead of job and drop cursors.</PS_CustomCursorsDesc>
     <PS_HaulingCursor>Hauling cursor</PS_HaulingCursor>
-    <PS_HaulingCursorDesc>While you are carrying something, the cursor becomes a drop marker, replacing the aiming reticle even while drafted.</PS_HaulingCursorDesc>
+    <PS_HaulingCursorDesc>While you are carrying something, the cursor becomes a drop marker, replacing the aiming reticle even while drafted. Bench cursors take priority where clicking would drop it into a bill.</PS_HaulingCursorDesc>
     <PS_EatTooltips>Food tooltips</PS_EatTooltips>
     <PS_EatTooltipsDesc>Hovering food within reach shows a hint over it reminding you that double-clicking eats it.</PS_EatTooltipsDesc>
     <PS_DrugTooltips>Drug tooltips</PS_DrugTooltips>
     <PS_DrugTooltipsDesc>Show a tooltip with the drug's name and basic stats when standing over one.</PS_DrugTooltipsDesc>
     <PS_DisableDoubleClickDrug>Disable double-click to ingest drugs</PS_DisableDoubleClickDrug>
     <PS_DisableDoubleClickDrugDesc>Stop a double-click on a held drug from making the avatar ingest it.</PS_DisableDoubleClickDrugDesc>
+    <PS_BookTooltips>Book tooltips</PS_BookTooltips>
+    <PS_BookTooltipsDesc>Show a tooltip with the book's title, quality and what reading it would give when standing over one.</PS_BookTooltipsDesc>
+    <PS_DisableDoubleClickRead>Disable double-click to read books</PS_DisableDoubleClickRead>
+    <PS_DisableDoubleClickReadDesc>Stop a double-click on a held book from making the avatar read it.</PS_DisableDoubleClickReadDesc>
     <PS_HintDps>DPS</PS_HintDps>
     <PS_HintArmorPenetration>AP</PS_HintArmorPenetration>
     <PS_HintArmorSharp>Sharp</PS_HintArmorSharp>
@@ -95,14 +103,25 @@
     <PS_HintNutrition>Nutrition</PS_HintNutrition>
     <PS_HintJoy>Joy</PS_HintJoy>
     <PS_HintAddictiveness>Addiction</PS_HintAddictiveness>
+    <PS_HintMentalBreak>Mental break</PS_HintMentalBreak>
+    <PS_HintPerHour>{0}/h</PS_HintPerHour>
+    <PS_HintXpPerHour>{0} XP/h</PS_HintXpPerHour>
+    <PS_HintNoGain>No gain</PS_HintNoGain>
     <PS_ClickAndHoldToHarvest>Click and hold to harvest</PS_ClickAndHoldToHarvest>
     <PS_ClickToHarvest>Click to harvest</PS_ClickToHarvest>
     <PS_HarvestTooltips>Harvest tooltips</PS_HarvestTooltips>
     <PS_HarvestTooltipsDesc>Hovering a harvestable plant within reach shows what it yields and that yield's nutrition.</PS_HarvestTooltipsDesc>
+    <PS_BillTooltips>Workbench tooltips</PS_BillTooltips>
+    <PS_BillTooltipsDesc>Hovering a workbench within reach shows the bill a click would start: what it makes, the ingredients it would use and your skill.</PS_BillTooltipsDesc>
+    <PS_ClickToStartBill>Click to start this bill</PS_ClickToStartBill>
+    <PS_ClickToResumeBill>Click to resume this bill</PS_ClickToResumeBill>
+    <PS_ClickToDropAndStartBill>Click to use resources on this bill</PS_ClickToDropAndStartBill>
+    <PS_ClickToDropAndResumeBill>Click to resume with this bill</PS_ClickToDropAndResumeBill>
     <PS_DoubleClickToEquip>Double-click to equip</PS_DoubleClickToEquip>
     <PS_DoubleClickToWear>Double-click to wear</PS_DoubleClickToWear>
     <PS_DoubleClickToEat>Double-click to eat</PS_DoubleClickToEat>
     <PS_DoubleClickToIngest>Double-click to ingest</PS_DoubleClickToIngest>
+    <PS_DoubleClickToRead>Double-click to read</PS_DoubleClickToRead>
     <PS_WashYourself>Wash yourself</PS_WashYourself>
     <PS_DrinkWater>Drink water</PS_DrinkWater>
     <PS_RelieveBladder>Relieve bladder in water</PS_RelieveBladder>
@@ -229,6 +248,8 @@
     <PS_FishingIncapable>incapable of fishing</PS_FishingIncapable>
     <PS_MineCursor>Mine cursor</PS_MineCursor>
     <PS_MineCursorDesc>Swaps the cursor to a pickaxe when hovering over rock or a wall your character could mine.</PS_MineCursorDesc>
+    <PS_SmoothCursor>Smooth cursor</PS_SmoothCursor>
+    <PS_SmoothCursorDesc>Show a cursor when hovering a wall marked for smoothing that your character could smooth right now. Takes priority over the mine cursor on that wall. Only shows when Construction is assigned to your character.</PS_SmoothCursorDesc>
     <PS_ChunkWorkoutLift>Lift {0}</PS_ChunkWorkoutLift>
     <PS_ChunkWorkoutPress>Overhead press {0}</PS_ChunkWorkoutPress>
     <PS_ChunkWorkoutSquat>Squat with {0}</PS_ChunkWorkoutSquat>
@@ -252,6 +273,10 @@
     <PS_HarvestCursorDesc>Swaps the cursor to a sickle when hovering over a plant your character could harvest.</PS_HarvestCursorDesc>
     <PS_CutCursor>Cut cursor</PS_CutCursor>
     <PS_CutCursorDesc>Show a scythe cursor when holding left click would cut a plant marked for cutting.</PS_CutCursorDesc>
+    <PS_PlantCursor>Plant cursor</PS_PlantCursor>
+    <PS_PlantCursorDesc>Show a cursor when hovering a growing zone, hydroponics basin or plant pot cell your character could sow right now. Only shows when Growing is assigned to your character.</PS_PlantCursorDesc>
+    <PS_PlowCursor>Plow cursor</PS_PlowCursor>
+    <PS_PlowCursorDesc>Show a cursor when hovering snow or sand inside the snow/sand clear area that your character could clear right now. Only shows when Cleaning is assigned to your character.</PS_PlowCursorDesc>
     <PS_TraverseCursor>Traverse cursor</PS_TraverseCursor>
     <PS_TraverseCursorDesc>Show a cursor when hovering stairs, ladders or an elevator the avatar can use to change level. Requires As above, So below II.</PS_TraverseCursorDesc>
     <PS_ReloadCursors>Reload cursors</PS_ReloadCursors>
@@ -264,6 +289,24 @@
     <PS_RecreationCursorDesc>Show a cursor when hovering a recreation building the avatar can use, like a chess or billiards table. Watched buildings such as a television show it while the avatar stands somewhere it can watch from.</PS_RecreationCursorDesc>
     <PS_ResearchCursor>Research cursor</PS_ResearchCursor>
     <PS_ResearchCursorDesc>Swaps the cursor when hovering over a research bench your character could work at. Hidden while you are already researching.</PS_ResearchCursorDesc>
+    <PS_CookCursor>Cook cursor</PS_CookCursor>
+    <PS_CookCursorDesc>Show a cursor when hovering a stove or campfire where clicking would start cooking. Only shows when a cooking bill is ready, its ingredients are within reach, and Cooking is assigned to your character. While carrying an ingredient, it also shows where clicking would drop it and start cooking.</PS_CookCursorDesc>
+    <PS_ButcherCursor>Butcher cursor</PS_ButcherCursor>
+    <PS_ButcherCursorDesc>Show a cursor when hovering a butcher table or spot where clicking would start butchering. Only shows when a butchering bill is ready, a corpse is within reach, and Cooking is assigned to your character. While carrying a corpse, it also shows where clicking would drop it and start butchering.</PS_ButcherCursorDesc>
+    <PS_StonecuttingCursor>Stonecutting cursor</PS_StonecuttingCursor>
+    <PS_StonecuttingCursorDesc>Show a cursor when hovering a stonecutter's table where clicking would start cutting stone blocks. Only shows when a stonecutting bill is ready, a stone chunk is within reach, and Crafting is assigned to your character. While carrying a stone chunk, it also shows where clicking would drop it and start cutting.</PS_StonecuttingCursorDesc>
+    <PS_BrewCursor>Brew cursor</PS_BrewCursor>
+    <PS_BrewCursorDesc>Show a cursor when hovering a brewery where clicking would start brewing. Only shows when a brewing bill is ready, its ingredients are within reach, and Cooking is assigned to your character. While carrying an ingredient, it also shows where clicking would drop it and start brewing.</PS_BrewCursorDesc>
+    <PS_SmeltCursor>Smelt cursor</PS_SmeltCursor>
+    <PS_SmeltCursorDesc>Show a cursor when hovering a smelter where clicking would start smelting. Only shows when a smelting bill is ready, something to smelt is within reach, and Crafting is assigned to your character. While carrying something to smelt, it also shows where clicking would drop it and start smelting.</PS_SmeltCursorDesc>
+    <PS_TailorCursor>Tailor cursor</PS_TailorCursor>
+    <PS_TailorCursorDesc>Show a cursor when hovering a tailoring bench where clicking would start tailoring. Only shows when a tailoring bill is ready, its materials are within reach, and Tailoring is assigned to your character. While carrying materials, it also shows where clicking would drop them and start tailoring.</PS_TailorCursorDesc>
+    <PS_TameCursor>Tame cursor</PS_TameCursor>
+    <PS_TameCursorDesc>Show a cursor when hovering an animal marked for taming that your character could tame right now. Only shows when Handling is assigned to your character and suitable food is on them or within reach.</PS_TameCursorDesc>
+    <PS_SlaughterCursor>Slaughter cursor</PS_SlaughterCursor>
+    <PS_SlaughterCursorDesc>Show a cursor when hovering an animal marked for slaughter that your character could slaughter right now. Only shows when Handling is assigned to your character.</PS_SlaughterCursorDesc>
+    <PS_ReleaseToWildCursor>Release to wild cursor</PS_ReleaseToWildCursor>
+    <PS_ReleaseToWildCursorDesc>Show a cursor when hovering an animal marked for release that your character could release to the wild right now. Only shows when Handling is assigned to your character.</PS_ReleaseToWildCursorDesc>
     <PS_RoofCursor>Roof cursor</PS_RoofCursor>
     <PS_RoofCursorDesc>Swaps the cursor when hovering over a cell marked for roofing that your character could roof.</PS_RoofCursorDesc>
     <PS_FishingMinigame>Fishing minigame</PS_FishingMinigame>

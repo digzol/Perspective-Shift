@@ -24,6 +24,7 @@ namespace PerspectiveShift
         public bool disableDoubleClickEquip = false;
         public bool disableDoubleClickEat = false;
         public bool disableDoubleClickDrug = false;
+        public bool disableDoubleClickRead = false;
 
         public bool enableSprinting = true;
         public bool enableSneaking = true;
@@ -51,21 +52,37 @@ namespace PerspectiveShift
         public bool apparelTooltips = true;
         public bool eatTooltips = true;
         public bool drugTooltips = true;
+        public bool bookTooltips = true;
         public bool harvestTooltips = true;
+        public bool billTooltips = true;
+        public bool customCursors = true;
         public bool haulingCursor = false;
         public bool mineCursor = true;
+        public bool smoothCursor = true;
         public bool buildCursor = true;
         public bool chopCursor = true;
         public bool harvestCursor = true;
         public bool cutCursor = true;
+        public bool plantCursor = true;
+        public bool plowCursor = true;
         public bool traverseCursor = true;
         public bool reloadCursors = true;
         public bool openCursor = true;
         public bool sleepCursor = true;
         public bool recreationCursor = true;
         public bool researchCursor = true;
+        public bool cookCursor = true;
+        public bool butcherCursor = true;
+        public bool stonecuttingCursor = true;
+        public bool brewCursor = true;
+        public bool smeltCursor = true;
+        public bool tailorCursor = true;
+        public bool tameCursor = true;
+        public bool slaughterCursor = true;
+        public bool releaseToWildCursor = true;
         public bool roofCursor = true;
         public bool fishingMinigame = true;
+        public bool instantEquip = true;
 
         public override void ExposeData()
         {
@@ -80,6 +97,7 @@ namespace PerspectiveShift
             Scribe_Values.Look(ref disableDoubleClickEquip, "disableDoubleClickEquip", false);
             Scribe_Values.Look(ref disableDoubleClickEat, "disableDoubleClickEat", false);
             Scribe_Values.Look(ref disableDoubleClickDrug, "disableDoubleClickDrug", false);
+            Scribe_Values.Look(ref disableDoubleClickRead, "disableDoubleClickRead", false);
 
             Scribe_Values.Look(ref showControlsOnFirstInhabit, "showControlsOnFirstInhabit", true);
             Scribe_Values.Look(ref sleepingPreventsVision, "sleepingPreventsVision", true);
@@ -89,21 +107,37 @@ namespace PerspectiveShift
             Scribe_Values.Look(ref apparelTooltips, "apparelTooltips", true);
             Scribe_Values.Look(ref eatTooltips, "eatTooltips", true);
             Scribe_Values.Look(ref drugTooltips, "drugTooltips", true);
+            Scribe_Values.Look(ref bookTooltips, "bookTooltips", true);
             Scribe_Values.Look(ref harvestTooltips, "harvestTooltips", true);
+            Scribe_Values.Look(ref billTooltips, "billTooltips", true);
+            Scribe_Values.Look(ref customCursors, "customCursors", true);
             Scribe_Values.Look(ref haulingCursor, "haulingCursor", false);
             Scribe_Values.Look(ref mineCursor, "mineCursor", true);
+            Scribe_Values.Look(ref smoothCursor, "smoothCursor", true);
             Scribe_Values.Look(ref buildCursor, "buildCursor", true);
             Scribe_Values.Look(ref chopCursor, "chopCursor", true);
             Scribe_Values.Look(ref harvestCursor, "harvestCursor", true);
             Scribe_Values.Look(ref cutCursor, "cutCursor", true);
+            Scribe_Values.Look(ref plantCursor, "plantCursor", true);
+            Scribe_Values.Look(ref plowCursor, "plowCursor", true);
             Scribe_Values.Look(ref traverseCursor, "traverseCursor", true);
             Scribe_Values.Look(ref reloadCursors, "reloadCursors", true);
             Scribe_Values.Look(ref openCursor, "openCursor", true);
             Scribe_Values.Look(ref sleepCursor, "sleepCursor", true);
             Scribe_Values.Look(ref recreationCursor, "recreationCursor", true);
             Scribe_Values.Look(ref researchCursor, "researchCursor", true);
+            Scribe_Values.Look(ref cookCursor, "cookCursor", true);
+            Scribe_Values.Look(ref butcherCursor, "butcherCursor", true);
+            Scribe_Values.Look(ref stonecuttingCursor, "stonecuttingCursor", true);
+            Scribe_Values.Look(ref brewCursor, "brewCursor", true);
+            Scribe_Values.Look(ref smeltCursor, "smeltCursor", true);
+            Scribe_Values.Look(ref tailorCursor, "tailorCursor", true);
+            Scribe_Values.Look(ref tameCursor, "tameCursor", true);
+            Scribe_Values.Look(ref slaughterCursor, "slaughterCursor", true);
+            Scribe_Values.Look(ref releaseToWildCursor, "releaseToWildCursor", true);
             Scribe_Values.Look(ref roofCursor, "roofCursor", true);
             Scribe_Values.Look(ref fishingMinigame, "fishingMinigame", true);
+            Scribe_Values.Look(ref instantEquip, "instantEquip", true);
             Scribe_Values.Look(ref enableSprinting, "enableSprinting", true);
             Scribe_Values.Look(ref enableSneaking, "enableSneaking", true);
             Scribe_Values.Look(ref sprintSpeedMultiplier, "sprintSpeedMultiplier", 1.3f);

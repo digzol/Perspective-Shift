@@ -23,6 +23,7 @@ namespace PerspectiveShift
             public string delta;
             public float deltaWidth;
             public int sign;
+            public Thing icon;
         }
 
         private readonly List<Apparel> replacedApparelBuffer = new List<Apparel>();
@@ -100,6 +101,67 @@ namespace PerspectiveShift
             }
         }
 
+        private void BuildBookHintStats(Book book)
+        {
+            equipHintTitle = null;
+            equipHintQuality = null;
+            equipHintStatCount = 0;
+            if (book == null) return;
+
+            SetHintIdentity(book);
+
+            if (book.MentalBreakChancePerHour > 0f)
+            {
+                AddHintStatText("PS_HintMentalBreak".Translate(), "PS_HintPerHour".Translate(book.MentalBreakChancePerHour.ToStringPercent("0.0")));
+            }
+
+            foreach (var doer in book.BookComp.Doers)
+            {
+                if (doer is BookOutcomeDoerGainSkillExp skillDoer)
+                {
+                    AddBookSkillStats(skillDoer);
+                }
+                else if (doer is ReadingOutcomeDoerGainResearch researchDoer)
+                {
+                    AddBookResearchStats(researchDoer);
+                }
+                else if (doer is ReadingOutcomeDoerJoyFactorModifier)
+                {
+                    AddHintStatText("PS_HintJoy".Translate(), "x" + book.JoyFactor.ToStringPercent());
+                }
+            }
+        }
+
+        private void AddBookSkillStats(BookOutcomeDoerGainSkillExp doer)
+        {
+            foreach (var entry in doer.Values)
+            {
+                string value = "PS_HintNoGain".Translate();
+                if (pawn.skills != null && BookOutcomeDoerGainSkillExp.CanProgressSkill(pawn, entry.Key, doer.Quality))
+                {
+                    float xpPerHour = entry.Value * pawn.skills.GetSkill(entry.Key).LearnRateFactor() * GenDate.TicksPerHour;
+                    value = "PS_HintXpPerHour".Translate(xpPerHour.ToStringDecimalIfSmall());
+                }
+                AddHintStatText(entry.Key.LabelCap, value);
+            }
+        }
+
+        private void AddBookResearchStats(ReadingOutcomeDoerGainResearch doer)
+        {
+            foreach (var entry in doer.values)
+            {
+                var project = entry.Key;
+                string value = "PS_HintNoGain".Translate();
+                if (!project.IsFinished && doer.IsProjectVisible(project))
+                {
+                    float perHour = entry.Value * GenDate.TicksPerHour;
+                    if (doer.RoundTo != 0) perHour = Mathf.Round(perHour / doer.RoundTo) * doer.RoundTo;
+                    value = "PS_HintPerHour".Translate(perHour.ToStringDecimalIfSmall());
+                }
+                AddHintStatText(project.LabelCap, value);
+            }
+        }
+
         private void BuildHarvestHintStats(Plant plant)
         {
             equipHintTitle = null;
@@ -114,6 +176,111 @@ namespace PerspectiveShift
             {
                 AddHintStat("PS_HintNutrition".Translate(), yieldDef.GetStatValueAbstract(StatDefOf.Nutrition), 0f, HintStatFormat.Nutrition);
             }
+        }
+
+        private void BuildBillHintStats(Thing bench, Bill bill, bool carrying, out string label, out Texture2D icon)
+        {
+            var recipe = bill.recipe;
+            var things = jobCursorBillThings;
+            var counts = jobCursorBillCounts;
+
+            equipHintBill = bill;
+            equipHintTitle = bill.LabelCap;
+            equipHintQuality = BillRepeatText(bill);
+            equipHintStatCount = 0;
+            SetBillTitleIcon(recipe, things, counts);
+
+            var skill = recipe.workSkill != null ? pawn.skills?.GetSkill(recipe.workSkill) : null;
+            int ingredientSlots = equipHintStats.Length - (skill != null ? 1 : 0);
+            for (int i = 0; i < things.Count && equipHintStatCount < ingredientSlots; i++)
+            {
+                var thing = things[i];
+                if (thing is UnfinishedThing uft)
+                {
+                    float work = bill.GetWorkAmount(uft);
+                    float done = uft.Initialized && work > 0f ? Mathf.Clamp01(1f - uft.workLeft / work) : 0f;
+                    AddHintIngredient(uft, InstanceLabel(uft), done.ToStringPercent());
+                    continue;
+                }
+
+                if (IndexOfSameIngredient(things, thing) < i) continue;
+
+                int total = 0;
+                for (int k = i; k < things.Count; k++)
+                {
+                    if (things[k].def == thing.def && things[k].Stuff == thing.Stuff) total += counts[k];
+                }
+                AddHintIngredient(thing, GenLabel.ThingLabel(thing.def, thing.Stuff).CapitalizeFirst(thing.def), "x" + total);
+            }
+
+            if (skill != null) AddHintStatText(recipe.workSkill.LabelCap, skill.Level.ToString());
+
+            bool resume = jobCursorBillResume;
+            string key = carrying
+                ? (resume ? "PS_ClickToDropAndResumeBill" : "PS_ClickToDropAndStartBill")
+                : (resume ? "PS_ClickToResumeBill" : "PS_ClickToStartBill");
+            label = key.Translate();
+
+            var category = BillCategory(bench, recipe);
+            icon = category != CursorJobHint.None ? CursorTexFor(category) : null;
+        }
+
+        private static string BillRepeatText(Bill bill)
+        {
+            if (bill is not Bill_Production production) return null;
+
+            var mode = production.repeatMode;
+            if (mode != BillRepeatModeDefOf.Forever && mode != BillRepeatModeDefOf.RepeatCount && mode != BillRepeatModeDefOf.TargetCount) return null;
+            return production.RepeatInfoText;
+        }
+
+        private static int IndexOfSameIngredient(List<Thing> things, Thing thing)
+        {
+            for (int i = 0; i < things.Count; i++)
+            {
+                if (things[i].def == thing.def && things[i].Stuff == thing.Stuff) return i;
+            }
+            return -1;
+        }
+
+        private void SetBillTitleIcon(RecipeDef recipe, List<Thing> things, List<int> counts)
+        {
+            var product = recipe.UIIconThing;
+            if (product != null)
+            {
+                equipHintTitleDef = product;
+                if (product.MadeFromStuff) equipHintTitleStuff = BillStuff(recipe, things, counts);
+                return;
+            }
+
+            equipHintTitleTex = recipe.UIIcon;
+            if (equipHintTitleTex == null && things.Count > 0) equipHintTitleThing = things[0];
+        }
+
+        private static ThingDef BillStuff(RecipeDef recipe, List<Thing> things, List<int> counts)
+        {
+            if (things.Count == 0) return null;
+            if (things[0] is UnfinishedThing uft) return uft.Stuff;
+            if (recipe.productHasIngredientStuff) return things[0].def;
+
+            ThingDef stuff = null;
+            int best = 0;
+            for (int i = 0; i < things.Count; i++)
+            {
+                var def = things[i].def;
+                if (!def.IsStuff || def == stuff) continue;
+
+                int total = 0;
+                for (int k = i; k < things.Count; k++)
+                {
+                    if (things[k].def == def) total += counts[k];
+                }
+                if (total <= best) continue;
+
+                stuff = def;
+                best = total;
+            }
+            return stuff;
         }
 
         private bool CanHarvestNow(Plant plant)
@@ -214,6 +381,20 @@ namespace PerspectiveShift
                 stat.delta = FormatHintStat(Mathf.Abs(delta), format);
             }
             equipHintStats[equipHintStatCount++] = stat;
+        }
+
+        private void AddHintStatText(string label, string value)
+        {
+            if (equipHintStatCount >= equipHintStats.Length) return;
+
+            equipHintStats[equipHintStatCount++] = new HintStat { label = label, value = value };
+        }
+
+        private void AddHintIngredient(Thing thing, string label, string value)
+        {
+            if (equipHintStatCount >= equipHintStats.Length) return;
+
+            equipHintStats[equipHintStatCount++] = new HintStat { label = label, value = value, icon = thing };
         }
 
         private static string FormatHintStat(float value, HintStatFormat format)

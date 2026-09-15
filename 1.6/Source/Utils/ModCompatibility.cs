@@ -28,6 +28,7 @@ namespace PerspectiveShift
         public static readonly bool ProgressionAmmunitionAvailable;
         public static readonly bool DubsBadHygieneAvailable;
         public static readonly bool ThemingModAvailable;
+        public static readonly bool AlphaBooksAvailable;
 
         private static Type vehiclePawnType;
         private static MethodInfo addOrTransferMethod;
@@ -85,6 +86,9 @@ namespace PerspectiveShift
 
         private static Type abStairsType;
         private static PropertyInfo abCounterpartsProperty;
+
+        private static Type alphaBookType;
+        public static JobDef AlphaBookReadingJob;
 
         private static Type rimbodyDBType;
         private static MethodInfo compPhysiqueMethod;
@@ -177,6 +181,10 @@ namespace PerspectiveShift
             DubsBadHygieneAvailable = ModsConfig.IsActive("Dubwise.DubsBadHygiene") || ModsConfig.IsActive("Dubwise.DubsBadHygiene.Lite");
             if (DubsBadHygieneAvailable && !InitDBHCompat())
                 DubsBadHygieneAvailable = false;
+
+            AlphaBooksAvailable = ModsConfig.IsActive("sarg.alphabooks");
+            if (AlphaBooksAvailable && !InitAlphaBooksCompat())
+                AlphaBooksAvailable = false;
 
             ThemingModAvailable = ModsConfig.IsActive("ferny.themingformodpack");
         }
@@ -373,6 +381,13 @@ namespace PerspectiveShift
             return !ammoType.NullOrEmpty();
         }
 
+        private static bool InitAlphaBooksCompat()
+        {
+            if (!Require(ref alphaBookType, () => AccessTools.TypeByName("AlphaBooks.Book_NotAutoReadable"), "Book_NotAutoReadable type", "AlphaBooks")) return false;
+            if (!Require(ref AlphaBookReadingJob, () => DefDatabase<JobDef>.GetNamedSilentFail("ABooks_Reading"), "ABooks_Reading job", "AlphaBooks")) return false;
+            return true;
+        }
+
         private static bool InitAsAboveSoBelowCompat()
         {
             if (!Require(ref abStairsType, () => AccessTools.TypeByName("AsAboveSoBelow.Building_ABStairs2"), "Building_ABStairs2 type", "AsAboveSoBelow")) return false;
@@ -387,6 +402,8 @@ namespace PerspectiveShift
 
             return abCounterpartsProperty.GetValue(thing, null) is ICollection counterparts && counterparts.Count > 0;
         }
+
+        public static bool IsAlphaBook(Thing thing) => AlphaBooksAvailable && alphaBookType.IsInstanceOfType(thing);
 
         private static bool InitRimbodyChunkCompat()
         {

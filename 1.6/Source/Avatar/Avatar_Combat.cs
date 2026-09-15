@@ -37,6 +37,42 @@ namespace PerspectiveShift
         private static Texture2D _cutCursorTex;
         public static Texture2D CutCursorTex => _cutCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Scythe");
 
+        private static Texture2D _plantCursorTex;
+        public static Texture2D PlantCursorTex => _plantCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Plant");
+
+        private static Texture2D _plowCursorTex;
+        public static Texture2D PlowCursorTex => _plowCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Plow");
+        
+        private static Texture2D _smoothCursorTex;
+        public static Texture2D SmoothCursorTex => _smoothCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Smooth");
+        
+        private static Texture2D _cookCursorTex;
+        public static Texture2D CookCursorTex => _cookCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Cook");
+        
+        private static Texture2D _butcherCursorTex;
+        public static Texture2D ButcherCursorTex => _butcherCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Butcher");
+        
+        private static Texture2D _stonecuttingCursorTex;
+        public static Texture2D StonecuttingCursorTex => _stonecuttingCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Stonecutting");
+
+        private static Texture2D _brewCursorTex;
+        public static Texture2D BrewCursorTex => _brewCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Brew");
+
+        private static Texture2D _smeltCursorTex;
+        public static Texture2D SmeltCursorTex => _smeltCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Smelt");
+
+        private static Texture2D _tailorCursorTex;
+        public static Texture2D TailorCursorTex => _tailorCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Tailor");
+        
+        private static Texture2D _tameCursorTex;
+        public static Texture2D TameCursorTex => _tameCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Tame");
+        
+        private static Texture2D _slaughterCursorTex;
+        public static Texture2D SlaughterCursorTex => _slaughterCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Slaughter");
+        
+        private static Texture2D _releaseToWildCursorTex;
+        public static Texture2D ReleaseToWildCursorTex => _releaseToWildCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/ReleaseToWild");
+
         private static Texture2D _arrowsCursorTex;
         public static Texture2D ArrowsCursorTex => _arrowsCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Arrows");
 
@@ -353,15 +389,9 @@ namespace PerspectiveShift
             bool cursorBlocked = mouseOverUI || mouseOverGizmo || State.ControlsFrozen || Find.Targeter.IsTargeting
                 || WorldRendererUtility.WorldSelected;
 
-            if (PerspectiveShiftMod.settings.haulingCursor && CarriedThing != null && !pawn.InMentalState && !cursorBlocked)
-            {
-                if (drafted && !IsMoving) LeanTarget = Vector3.zero;
-                Cursor.visible = false;
-                DrawDropCursor(UI.MousePositionOnUIInverted);
-                return;
-            }
+            bool customCursors = PerspectiveShiftMod.settings.customCursors;
 
-            if (!drafted && !cursorBlocked)
+            if (customCursors && !drafted && !cursorBlocked)
             {
                 var hint = MouseOverJobTarget();
                 if (hint != CursorJobHint.None)
@@ -370,6 +400,14 @@ namespace PerspectiveShift
                     DrawJobCursor(UI.MousePositionOnUIInverted, CursorTexFor(hint));
                     return;
                 }
+            }
+
+            if (customCursors && PerspectiveShiftMod.settings.haulingCursor && CarriedThing != null && !pawn.InMentalState && !cursorBlocked)
+            {
+                if (drafted && !IsMoving) LeanTarget = Vector3.zero;
+                Cursor.visible = false;
+                DrawDropCursor(UI.MousePositionOnUIInverted);
+                return;
             }
 
             if (drafted && !cursorBlocked && !Find.TickManager.Paused)
@@ -390,6 +428,9 @@ namespace PerspectiveShift
             Chop,
             Harvest,
             Cut,
+            Plant,
+            Plow,
+            Smooth,
             Traverse,
             Open,
             ReloadArrow,
@@ -398,6 +439,15 @@ namespace PerspectiveShift
             Sleep,
             Recreation,
             Research,
+            Cook,
+            Butcher,
+            Stonecutting,
+            Brew,
+            Smelt,
+            Tailor,
+            Tame,
+            Slaughter,
+            ReleaseToWild,
             Roof,
         }
 
@@ -409,6 +459,8 @@ namespace PerspectiveShift
                 case CursorJobHint.Chop: return ChopCursorTex;
                 case CursorJobHint.Harvest: return HarvestCursorTex;
                 case CursorJobHint.Cut: return CutCursorTex;
+                case CursorJobHint.Plant: return PlantCursorTex;
+                case CursorJobHint.Plow: return PlowCursorTex;
                 case CursorJobHint.Traverse: return TraverseCursorTex;
                 case CursorJobHint.Open: return OpenCursorTex;
                 case CursorJobHint.ReloadArrow: return ArrowsCursorTex;
@@ -417,23 +469,54 @@ namespace PerspectiveShift
                 case CursorJobHint.Sleep: return SleepCursorTex;
                 case CursorJobHint.Recreation: return RecreationCursorTex;
                 case CursorJobHint.Research: return ResearchCursorTex;
+                case CursorJobHint.Smooth: return SmoothCursorTex;
+                case CursorJobHint.Cook: return CookCursorTex;
+                case CursorJobHint.Butcher: return ButcherCursorTex;
+                case CursorJobHint.Stonecutting: return StonecuttingCursorTex;
+                case CursorJobHint.Brew: return BrewCursorTex;
+                case CursorJobHint.Smelt: return SmeltCursorTex;
+                case CursorJobHint.Tailor: return TailorCursorTex;
+                case CursorJobHint.Tame: return TameCursorTex;
+                case CursorJobHint.Slaughter: return SlaughterCursorTex;
+                case CursorJobHint.ReleaseToWild: return ReleaseToWildCursorTex;
                 case CursorJobHint.Roof: return RoofCursorTex;
                 default: return MineCursorTex;
             }
         }
 
         private const float JobCursorRefresh = 0.25f;
+        private const float BillMemoCostFactor = 100f;
+        private const float BillMemoMaxAge = 3f;
 
         private IntVec3 jobCursorCell = IntVec3.Invalid;
         private IntVec3 jobCursorPawnCell = IntVec3.Invalid;
         private CursorJobHint jobCursorHint;
         private Thing jobCursorTarget;
         private float jobCursorStaleAt;
+        private Thing jobCursorCarried;
+        private int jobCursorStamp;
+        private Bill jobCursorBill;
+        private bool jobCursorBillResume;
+        private readonly List<Thing> jobCursorBillThings = new List<Thing>();
+        private readonly List<int> jobCursorBillCounts = new List<int>();
+        private Thing billMemoBench;
+        private IntVec3 billMemoPawnCell;
+        private Job billMemoJob;
+        private int billMemoSignature;
+        private bool billMemoDesignated;
+        private float billMemoStaleAt;
+        private bool billMemoResult;
+        private Bill billMemoBill;
+        private bool billMemoResume;
+        private readonly List<Thing> billMemoThings = new List<Thing>();
+        private readonly List<int> billMemoCounts = new List<int>();
+        private static readonly Dictionary<System.Type, bool> overridesHasJobOnThing = new Dictionary<System.Type, bool>();
 
         private CursorJobHint MouseOverJobTarget()
         {
-            if (CarriedThing != null || pawn.InMentalState || pawn.Map == null) return CursorJobHint.None;
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) return CursorJobHint.None;
+            if (pawn.InMentalState || pawn.Map == null) return NoJobTarget();
+            var carried = CarriedThing;
+            if (carried == null && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))) return NoJobTarget();
 
             var cell = UI.MouseCell();
             bool targetGone = jobCursorTarget != null && (jobCursorTarget.Destroyed || !jobCursorTarget.Spawned);
@@ -441,6 +524,7 @@ namespace PerspectiveShift
             if (!targetGone
                 && cell == jobCursorCell
                 && pawn.Position == jobCursorPawnCell
+                && carried == jobCursorCarried
                 && Time.realtimeSinceStartup < jobCursorStaleAt)
             {
                 return jobCursorHint;
@@ -448,14 +532,61 @@ namespace PerspectiveShift
 
             jobCursorCell = cell;
             jobCursorPawnCell = pawn.Position;
+            jobCursorCarried = carried;
             jobCursorStaleAt = Time.realtimeSinceStartup + JobCursorRefresh;
-            jobCursorHint = EvaluateJobTarget(cell, out jobCursorTarget);
+            jobCursorStamp++;
+            jobCursorHint = EvaluateJobTarget(cell, carried, out jobCursorTarget);
             return jobCursorHint;
         }
 
-        private CursorJobHint EvaluateJobTarget(IntVec3 cell, out Thing target)
+        private CursorJobHint NoJobTarget()
         {
-            var hint = EvaluateJobTargetInt(cell, out target);
+            if (jobCursorBill != null) jobCursorStamp++;
+            ClearClickBill();
+            jobCursorCell = IntVec3.Invalid;
+            jobCursorHint = CursorJobHint.None;
+            jobCursorTarget = null;
+            return CursorJobHint.None;
+        }
+
+        private void ClearClickBill()
+        {
+            jobCursorBill = null;
+            jobCursorBillResume = false;
+            jobCursorBillThings.Clear();
+            jobCursorBillCounts.Clear();
+        }
+
+        private void SetClickBill(Bill bill, bool resume)
+        {
+            ClearClickBill();
+            jobCursorBill = bill;
+            jobCursorBillResume = resume;
+        }
+
+        private void AddClickBillThing(Thing thing, int count)
+        {
+            if (thing == null) return;
+            jobCursorBillThings.Add(thing);
+            jobCursorBillCounts.Add(count);
+            if (thing is UnfinishedThing) jobCursorBillResume = true;
+        }
+
+        private void CaptureClickBill(Job job)
+        {
+            SetClickBill(job.bill, job.bill is Bill_Autonomous { State: not FormingState.Gathering });
+            var queue = job.targetQueueB;
+            if (queue == null) return;
+            for (int i = 0; i < queue.Count; i++)
+            {
+                AddClickBillThing(queue[i].Thing, job.countQueue != null && i < job.countQueue.Count ? job.countQueue[i] : 1);
+            }
+        }
+
+        private CursorJobHint EvaluateJobTarget(IntVec3 cell, Thing carried, out Thing target)
+        {
+            ClearClickBill();
+            var hint = carried != null ? EvaluateCarriedTarget(cell, carried, out target) : EvaluateJobTargetInt(cell, out target);
             JobFailReason.Clear();
             return hint;
         }
@@ -567,7 +698,9 @@ namespace PerspectiveShift
                 }
             }
 
-            if (settings.mineCursor && !pawn.WorkTypeIsDisabled(WorkTypeDefOf.Mining))
+            if (settings.smoothCursor && CanSmoothWallAt(cell)) return CursorJobHint.Smooth;
+
+            if (settings.mineCursor && !pawn.WorkTypeIsDisabled(WorkTypeDefOf.Mining) && !IsSmoothingWallAt(cell))
             {
                 var mineable = cell.GetFirstMineable(pawn.Map);
                 if (mineable != null && pawn.CanReserve(mineable))
@@ -579,24 +712,49 @@ namespace PerspectiveShift
 
             if (settings.roofCursor && CanBuildRoofAt(cell)) return CursorJobHint.Roof;
 
-            if (!settings.researchCursor && !settings.sleepCursor && !settings.recreationCursor) return CursorJobHint.None;
+            if (settings.plantCursor && CanSowAt(cell)) return CursorJobHint.Plant;
 
-            for (int i = 0; i < things.Count; i++)
+            if (settings.plowCursor && CanPlowAt(cell)) return CursorJobHint.Plow;
+
+            bool bills = (BillCursorsEnabled || settings.billTooltips) && !ClickPicksUpAt(cell);
+            if (bills || settings.researchCursor || settings.sleepCursor || settings.recreationCursor)
             {
-                if (CanResearchAt(things[i]))
+                for (int i = 0; i < things.Count; i++)
                 {
-                    target = things[i];
-                    return CursorJobHint.Research;
+                    if (bills && things[i] is Building and IBillGiver && FindClickBill(things[i], cell))
+                    {
+                        target = things[i];
+                        return ClassifyBill(things[i], jobCursorBill.recipe);
+                    }
+                    if (CanResearchAt(things[i]))
+                    {
+                        target = things[i];
+                        return CursorJobHint.Research;
+                    }
+                    if (CanSleepIn(things[i]))
+                    {
+                        target = things[i];
+                        return CursorJobHint.Sleep;
+                    }
+                    if (CanRecreateAt(things[i]))
+                    {
+                        target = things[i];
+                        return CursorJobHint.Recreation;
+                    }
                 }
-                if (CanSleepIn(things[i]))
+            }
+
+            if (settings.tameCursor || settings.slaughterCursor || settings.releaseToWildCursor)
+            {
+                for (int i = 0; i < things.Count; i++)
                 {
-                    target = things[i];
-                    return CursorJobHint.Sleep;
-                }
-                if (CanRecreateAt(things[i]))
-                {
-                    target = things[i];
-                    return CursorJobHint.Recreation;
+                    if (things[i] is not Pawn animal) continue;
+
+                    var animalHint = AnimalCursorHint(animal, cell);
+                    if (animalHint == CursorJobHint.None) continue;
+
+                    target = animal;
+                    return animalHint;
                 }
             }
 
@@ -661,6 +819,564 @@ namespace PerspectiveShift
             if (!RoofCollapseUtility.ConnectedToRoofHolder(cell, map, true)) return false;
 
             return RoofUtility.FirstBlockingThing(cell, map) == null;
+        }
+
+        private static WorkGiverDef _growerSowDef;
+        private static WorkGiverDef GrowerSowDef => _growerSowDef ??= DefDatabase<WorkGiverDef>.GetNamedSilentFail("GrowerSow");
+
+        private bool CanSowAt(IntVec3 cell)
+        {
+            var sowDef = GrowerSowDef;
+            if (sowDef?.Worker is not WorkGiver_GrowerSow scanner) return false;
+
+            var settable = cell.GetPlantToGrowSettable(pawn.Map);
+            if (settable == null) return false;
+
+            if (!CanOrderCellWork(sowDef, scanner, cell)) return false;
+
+            var savedPlantDef = WorkGiver_Grower.wantedPlantDef;
+            try
+            {
+                WorkGiver_Grower.wantedPlantDef = null;
+                if (!SowSettableAccepts(scanner, settable)) return false;
+                if (scanner.ShouldSkip(pawn, true)) return false;
+
+                return IsFreshJob(scanner.JobOnCell(pawn, cell, true));
+            }
+            finally
+            {
+                WorkGiver_Grower.wantedPlantDef = savedPlantDef;
+            }
+        }
+
+        private bool SowSettableAccepts(WorkGiver_GrowerSow scanner, IPlantToGrowSettable settable)
+        {
+            var maxDanger = pawn.NormalMaxDanger();
+            if (settable is Building_PlantGrower grower)
+            {
+                return grower.Faction == Faction.OfPlayer
+                    && scanner.ExtraRequirements(grower, pawn)
+                    && !grower.IsForbidden(pawn)
+                    && pawn.CanReach(grower, PathEndMode.OnCell, maxDanger)
+                    && !grower.IsBurning();
+            }
+            if (settable is Zone_Growing zone)
+            {
+                return zone.cells.Count > 0
+                    && scanner.ExtraRequirements(zone, pawn)
+                    && !zone.ContainsStaticFire
+                    && pawn.CanReach(zone.Cells[0], PathEndMode.OnCell, maxDanger);
+            }
+            return false;
+        }
+
+        private static WorkGiverDef _clearSnowDef;
+        private static WorkGiverDef ClearSnowDef => _clearSnowDef ??= DefDatabase<WorkGiverDef>.GetNamedSilentFail("CleanClearSnow");
+
+        private static WorkGiverDef _smoothWallsDef;
+        private static WorkGiverDef SmoothWallsDef => _smoothWallsDef ??= DefDatabase<WorkGiverDef>.GetNamedSilentFail("ConstructSmoothWalls");
+
+        private bool CanPlowAt(IntVec3 cell)
+        {
+            if (!pawn.Map.areaManager.SnowOrSandClear[cell] || HasWorkDesignationAt(cell)) return false;
+            return CanDoCellWork(ClearSnowDef, cell);
+        }
+
+        private bool CanSmoothWallAt(IntVec3 cell)
+        {
+            if (pawn.Map.designationManager.DesignationAt(cell, DesignationDefOf.SmoothWall) == null) return false;
+            return IsSmoothingWallAt(cell) || CanDoCellWork(SmoothWallsDef, cell);
+        }
+
+        private bool HasWorkDesignationAt(IntVec3 cell)
+        {
+            if (!pawn.Map.designationManager.TryGetCellDesignations(cell, out var designations)) return false;
+            for (int i = 0; i < designations.Count; i++)
+            {
+                if (designations[i].def != DesignationDefOf.Plan) return true;
+            }
+            return false;
+        }
+
+        private bool TakesWorkOrders => pawn.thinker?.TryGetMainTreeThinkNode<JobGiver_Work>() != null;
+
+        private bool CanOrderWork(WorkGiverDef def, WorkGiver_Scanner scanner)
+        {
+            if (!def.directOrderable || pawn.workSettings == null || !pawn.workSettings.EverWork) return false;
+            if (pawn.workSettings.GetPriority(def.workType) == 0) return false;
+            return !pawn.WorkTagIsDisabled(def.workTags) && scanner.MissingRequiredCapacity(pawn) == null;
+        }
+
+        private bool CanOrderCellWork(WorkGiverDef def, WorkGiver_Scanner scanner, IntVec3 cell)
+        {
+            if (!CanOrderWork(def, scanner) || !TakesWorkOrders) return false;
+            return !cell.IsForbidden(pawn) && pawn.CanReach(cell, PathEndMode.Touch, Danger.Deadly);
+        }
+
+        private bool IsFreshJob(Job job)
+        {
+            if (job == null) return false;
+            bool alreadyDoing = pawn.jobs.curJob != null && pawn.jobs.curJob.JobIsSameAs(pawn, job);
+            JobMaker.ReturnToPool(job);
+            return !alreadyDoing;
+        }
+
+        private bool CanDoCellWork(WorkGiverDef def, IntVec3 cell)
+        {
+            if (def?.Worker is not WorkGiver_Scanner scanner) return false;
+            if (scanner.ShouldSkip(pawn, true) || !scanner.HasJobOnCell(pawn, cell, true)) return false;
+            if (!CanOrderCellWork(def, scanner, cell)) return false;
+            return IsFreshJob(scanner.JobOnCell(pawn, cell, true));
+        }
+
+        private Job ThingWorkJob(WorkGiverDef def, Thing thing)
+        {
+            if (def.Worker is not WorkGiver_Scanner scanner || !CanOrderWork(def, scanner)) return null;
+            if (FloatMenuOptionProvider_WorkGivers.ScannerShouldSkip(pawn, scanner, thing)) return null;
+            bool overrides = OverridesHasJobOnThing(scanner);
+            Job job = overrides ? null : scanner.JobOnThing(pawn, thing, true);
+            if (overrides ? !scanner.HasJobOnThing(pawn, thing, true) : job == null) return null;
+            if (thing.IsForbidden(pawn) || !pawn.CanReach(thing, scanner.PathEndMode, Danger.Deadly))
+            {
+                JobMaker.ReturnToPool(job);
+                return null;
+            }
+
+            job ??= scanner.JobOnThing(pawn, thing, true);
+            if (job == null || pawn.jobs.curJob == null || !pawn.jobs.curJob.JobIsSameAs(pawn, job)) return job;
+            JobMaker.ReturnToPool(job);
+            return null;
+        }
+
+        private Job FirstThingWorkJob(Thing thing, out WorkGiverDef giver)
+        {
+            giver = null;
+            if (!TakesWorkOrders) return null;
+
+            var workTypes = DefDatabase<WorkTypeDef>.AllDefsListForReading;
+            for (int i = 0; i < workTypes.Count; i++)
+            {
+                var givers = workTypes[i].workGiversByPriority;
+                for (int j = 0; j < givers.Count; j++)
+                {
+                    var def = givers[j];
+                    if (def.equivalenceGroup != null) continue;
+                    try
+                    {
+                        var job = ThingWorkJob(def, thing);
+                        if (job == null) continue;
+
+                        giver = def;
+                        return job;
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Log.ErrorOnce($"[PerspectiveShift] Cursor check failed for {def.defName}: {ex}", ("PSCursor" + def.defName).GetHashCode());
+                    }
+                }
+            }
+            return null;
+        }
+
+        private readonly struct ClickContext : System.IDisposable
+        {
+            private readonly Pawn savedMakingFor;
+            private readonly bool savedLeftClick;
+
+            public ClickContext(Pawn pawn)
+            {
+                savedMakingFor = FloatMenuMakerMap.makingFor;
+                savedLeftClick = IsAvatarLeftClick;
+                FloatMenuMakerMap.makingFor = pawn;
+                IsAvatarLeftClick = true;
+            }
+
+            public void Dispose()
+            {
+                FloatMenuMakerMap.makingFor = savedMakingFor;
+                IsAvatarLeftClick = savedLeftClick;
+            }
+        }
+
+        private CursorJobHint AnimalCursorHint(Pawn animal, IntVec3 cell)
+        {
+            if (!animal.IsAnimal || animal.Downed || animal.IsSelfShutdown()) return CursorJobHint.None;
+
+            var settings = PerspectiveShiftMod.settings;
+            var designations = pawn.Map.designationManager;
+            bool marked = (settings.tameCursor && designations.DesignationOn(animal, DesignationDefOf.Tame) != null)
+                || (settings.slaughterCursor && animal.ShouldBeSlaughtered())
+                || (settings.releaseToWildCursor && designations.DesignationOn(animal, DesignationDefOf.ReleaseAnimalToWild) != null);
+            if (!marked || HasWorkDesignationAt(cell)) return CursorJobHint.None;
+
+            WorkGiverDef giver;
+            using (new ClickContext(pawn))
+            {
+                var job = FirstThingWorkJob(animal, out giver);
+                if (job != null) JobMaker.ReturnToPool(job);
+            }
+
+            switch (giver?.Worker)
+            {
+                case WorkGiver_Tame when settings.tameCursor: return CursorJobHint.Tame;
+                case WorkGiver_Slaughter when settings.slaughterCursor: return CursorJobHint.Slaughter;
+                case WorkGiver_ReleaseAnimalsToWild when settings.releaseToWildCursor: return CursorJobHint.ReleaseToWild;
+                default: return CursorJobHint.None;
+            }
+        }
+
+        private static WorkGiverDef _brewBillsDef;
+        private static WorkGiverDef BrewBillsDef => _brewBillsDef ??= DefDatabase<WorkGiverDef>.GetNamedSilentFail("DoBillsBrew");
+
+        private static WorkGiverDef _tailorBillsDef;
+        private static WorkGiverDef TailorBillsDef => _tailorBillsDef ??= DefDatabase<WorkGiverDef>.GetNamedSilentFail("DoBillsMakeApparel");
+
+        private static bool MakesSpecial(RecipeDef recipe, SpecialProductType type) => recipe.specialProducts != null && recipe.specialProducts.Contains(type);
+
+        private static bool BillCursorsEnabled
+        {
+            get
+            {
+                var settings = PerspectiveShiftMod.settings;
+                return settings.cookCursor || settings.butcherCursor || settings.stonecuttingCursor
+                    || settings.brewCursor || settings.smeltCursor || settings.tailorCursor;
+            }
+        }
+
+        private bool FindClickBill(Thing bench, IntVec3 cell)
+        {
+            if (BenchClaimsClick(bench)) return false;
+
+            bool designated = HasWorkDesignationAt(cell);
+            int signature = BillStackSignature((IBillGiver)bench);
+            if (bench == billMemoBench && pawn.Position == billMemoPawnCell && pawn.CurJob == billMemoJob
+                && designated == billMemoDesignated && signature == billMemoSignature && Time.realtimeSinceStartup < billMemoStaleAt)
+            {
+                if (billMemoBill != null)
+                {
+                    SetClickBill(billMemoBill, billMemoResume);
+                    jobCursorBillThings.AddRange(billMemoThings);
+                    jobCursorBillCounts.AddRange(billMemoCounts);
+                }
+                return billMemoResult;
+            }
+
+            long start = System.Diagnostics.Stopwatch.GetTimestamp();
+            bool result;
+            using (new ClickContext(pawn)) result = ClickBill(bench, cell);
+            float cost = (System.Diagnostics.Stopwatch.GetTimestamp() - start) / (float)System.Diagnostics.Stopwatch.Frequency;
+
+            billMemoBench = bench;
+            billMemoPawnCell = pawn.Position;
+            billMemoJob = pawn.CurJob;
+            billMemoDesignated = designated;
+            billMemoSignature = signature;
+            billMemoStaleAt = Time.realtimeSinceStartup + Mathf.Clamp(cost * BillMemoCostFactor, JobCursorRefresh, BillMemoMaxAge);
+            billMemoResult = result;
+            billMemoBill = jobCursorBill;
+            billMemoResume = jobCursorBillResume;
+            billMemoThings.Clear();
+            billMemoThings.AddRange(jobCursorBillThings);
+            billMemoCounts.Clear();
+            billMemoCounts.AddRange(jobCursorBillCounts);
+            return result;
+        }
+
+        private static int BillStackSignature(IBillGiver billGiver)
+        {
+            var bills = billGiver.BillStack;
+            int signature = bills.Count;
+            for (int i = 0; i < bills.Count; i++)
+            {
+                signature = signature * 31 + bills[i].loadID * 2 + (bills[i].suspended ? 1 : 0);
+            }
+            return signature;
+        }
+
+        private Job ScannerJobOnThing(WorkGiver_Scanner scanner, Thing thing, out bool hasJob)
+        {
+            if (!OverridesHasJobOnThing(scanner))
+            {
+                var job = scanner.JobOnThing(pawn, thing, true);
+                hasJob = job != null;
+                return job;
+            }
+            hasJob = scanner.HasJobOnThing(pawn, thing, true);
+            return hasJob ? scanner.JobOnThing(pawn, thing, true) : null;
+        }
+
+        private static bool OverridesHasJobOnThing(WorkGiver_Scanner scanner)
+        {
+            var type = scanner.GetType();
+            if (!overridesHasJobOnThing.TryGetValue(type, out bool overrides))
+            {
+                var method = type.GetMethod(nameof(WorkGiver_Scanner.HasJobOnThing), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance,
+                    null, new[] { typeof(Pawn), typeof(Thing), typeof(bool) }, null);
+                overrides = method == null || method.DeclaringType != typeof(WorkGiver_Scanner);
+                overridesHasJobOnThing[type] = overrides;
+            }
+            return overrides;
+        }
+
+        private bool BenchClaimsClick(Thing bench)
+        {
+            var designations = pawn.Map.designationManager;
+            if (designations.DesignationOn(bench, DesignationDefOf.Deconstruct) != null) return true;
+            if (!bench.def.Minifiable || (bench.Faction != pawn.Faction && !bench.def.building.alwaysUninstallable)) return false;
+            return InstallBlueprintUtility.ExistingBlueprintFor(bench) != null || designations.DesignationOn(bench, DesignationDefOf.Uninstall) != null;
+        }
+
+        private bool ClickPicksUpAt(IntVec3 cell)
+        {
+            var item = cell.GetFirstItem(pawn.Map);
+            if (item != null)
+            {
+                if (item is MinifiedThing && pawn.Map.designationManager.DesignationOn(item, DesignationDefOf.Deconstruct) != null) return false;
+                return item is not Skyfaller && item is not ActiveTransporter && item.def.EverHaulable;
+            }
+            var other = cell.GetFirstPawn(pawn.Map);
+            return other != null && other != pawn && (other.Downed || other.IsSelfShutdown());
+        }
+
+        private static CursorJobHint ClassifyBill(Thing bench, RecipeDef recipe)
+        {
+            var settings = PerspectiveShiftMod.settings;
+            var category = BillCategory(bench, recipe);
+            switch (category)
+            {
+                case CursorJobHint.Butcher: return settings.butcherCursor ? category : CursorJobHint.None;
+                case CursorJobHint.Smelt: return settings.smeltCursor ? category : CursorJobHint.None;
+                case CursorJobHint.Stonecutting: return settings.stonecuttingCursor ? category : CursorJobHint.None;
+                case CursorJobHint.Brew: return settings.brewCursor ? category : CursorJobHint.None;
+                case CursorJobHint.Tailor: return settings.tailorCursor ? category : CursorJobHint.None;
+                case CursorJobHint.Cook: return settings.cookCursor ? category : CursorJobHint.None;
+                default: return CursorJobHint.None;
+            }
+        }
+
+        private static CursorJobHint BillCategory(Thing bench, RecipeDef recipe)
+        {
+            if (MakesSpecial(recipe, SpecialProductType.Butchery)) return CursorJobHint.Butcher;
+            if (MakesSpecial(recipe, SpecialProductType.Smelted)) return CursorJobHint.Smelt;
+
+            if (MakesSpecial(recipe, SpecialProductType.StoneBlocks) || recipe.ProducedThingDef?.IsWithinCategory(ThingCategoryDefOf.StoneBlocks) == true)
+                return CursorJobHint.Stonecutting;
+
+            if (BrewBillsDef?.fixedBillGiverDefs?.Contains(bench.def) == true || recipe.ProducedThingDef == ThingDefOf.Wort) return CursorJobHint.Brew;
+            if (TailorBillsDef?.fixedBillGiverDefs?.Contains(bench.def) == true) return CursorJobHint.Tailor;
+
+            bool cooking = bench.def.building?.isMealSource == true || recipe.ProducedThingDef?.ingestible?.IsMeal == true;
+            return cooking ? CursorJobHint.Cook : CursorJobHint.None;
+        }
+
+        private bool ClickBill(Thing bench, IntVec3 cell)
+        {
+            if (pawn.workSettings == null) return false;
+
+            var workGivers = pawn.workSettings.WorkGiversInOrderNormal;
+            for (int i = 0; i < workGivers.Count; i++)
+            {
+                if (workGivers[i] is not WorkGiver_Scanner scanner || !scanner.PotentialWorkThingRequest.Accepts(bench)) continue;
+                var job = ScannerJobOnThing(scanner, bench, out bool hasJob);
+                if (!hasJob)
+                {
+                    if (pawn.WorkTypeIsDisabled(scanner.def.workType)) return false;
+                    continue;
+                }
+                if (job == null) continue;
+
+                bool clickable = job.def != JobDefOf.HaulToContainer && job.def != JobDefOf.Refuel && job.def != JobDefOf.RefuelAtomic
+                    && JobTargetsInRange(job) && !job.def.HasModExtension<DisableLeftClickExtension>();
+                bool isBill = clickable && job.def == JobDefOf.DoBill && job.bill != null;
+                if (isBill) CaptureClickBill(job);
+                bool fresh = IsFreshJob(job);
+                if (!clickable) continue;
+                if (isBill && !fresh) ClearClickBill();
+                return isBill && fresh;
+            }
+
+            if (HasWorkDesignationAt(cell)) return false;
+
+            var menuJob = FirstThingWorkJob(bench, out _);
+            if (menuJob == null) return false;
+
+            bool menuBill = menuJob.def == JobDefOf.DoBill && menuJob.bill != null;
+            if (menuBill) CaptureClickBill(menuJob);
+            JobMaker.ReturnToPool(menuJob);
+            return menuBill;
+        }
+
+        private static readonly Dictionary<ThingDef, WorkGiverDef> depositGiverByBench = new Dictionary<ThingDef, WorkGiverDef>();
+        private static readonly List<Thing> depositCandidates = new List<Thing>();
+        private static readonly List<ThingCount> depositChosen = new List<ThingCount>();
+
+        private CursorJobHint EvaluateCarriedTarget(IntVec3 cell, Thing carried, out Thing target)
+        {
+            target = null;
+            if ((!BillCursorsEnabled && !PerspectiveShiftMod.settings.billTooltips) || carried is Pawn || !cell.InBounds(pawn.Map)) return CursorJobHint.None;
+            if (pawn.Position.DistanceTo(cell) > PerspectiveShiftMod.settings.grabRange) return CursorJobHint.None;
+
+            var things = cell.GetThingList(pawn.Map);
+            for (int i = 0; i < things.Count; i++)
+            {
+                var thing = things[i];
+                if (ClaimsCarriedClick(thing, carried)) return CursorJobHint.None;
+                if (thing is not IBillGiver billGiver || !AcceptsDeposit(billGiver, carried)) continue;
+                if (thing is not Building) return CursorJobHint.None;
+
+                try
+                {
+                    using (new ClickContext(pawn)) DepositBill(thing, carried);
+                }
+                catch (System.Exception ex)
+                {
+                    ClearClickBill();
+                    Log.ErrorOnce($"[PerspectiveShift] Carried cursor check failed for {thing.def.defName}: {ex}", ("PSCarriedCursor" + thing.def.defName).GetHashCode());
+                }
+
+                if (jobCursorBill == null) return CursorJobHint.None;
+                target = thing;
+                return ClassifyBill(thing, jobCursorBill.recipe);
+            }
+            return CursorJobHint.None;
+        }
+
+        private static bool ClaimsCarriedClick(Thing thing, Thing carried)
+        {
+            switch (thing)
+            {
+                case Blueprint_Install:
+                    return true;
+                case Blueprint_Build blueprint:
+                    return blueprint.def.entityDefToBuild is not TerrainDef || blueprint.ThingCountNeeded(carried.def) > 0;
+                case Frame frame:
+                    return frame.def.entityDefToBuild is not TerrainDef || frame.ThingCountNeeded(carried.def) > 0;
+                case Pawn patient:
+                    return carried.def.IsMedicine && patient.health.HasHediffsNeedingTend();
+            }
+
+            var refuelable = thing.TryGetComp<CompRefuelable>();
+            return refuelable != null && refuelable.Props.fuelFilter.Allows(carried) && refuelable.GetFuelCountToFullyRefuel() > 0;
+        }
+
+        private bool AcceptsDeposit(IBillGiver billGiver, Thing carried)
+        {
+            var bills = billGiver.BillStack;
+            for (int i = 0; i < bills.Count; i++)
+            {
+                if (bills[i].ShouldDoNow() && BillWantsCarried(bills[i], carried)) return true;
+            }
+            return false;
+        }
+
+        private static WorkGiverDef DepositGiverDef(Thing bench)
+        {
+            if (depositGiverByBench.TryGetValue(bench.def, out var cached)) return cached;
+
+            WorkGiverDef found = null;
+            var defs = DefDatabase<WorkGiverDef>.AllDefsListForReading;
+            for (int i = 0; i < defs.Count; i++)
+            {
+                if (defs[i].Worker is WorkGiver_DoBill doBill && doBill.ThingIsUsableBillGiver(bench))
+                {
+                    found = defs[i];
+                    break;
+                }
+            }
+            depositGiverByBench[bench.def] = found;
+            return found;
+        }
+
+        private void DepositBill(Thing bench, Thing carried)
+        {
+            var giverDef = DepositGiverDef(bench);
+            var billGiver = (IBillGiver)bench;
+            if (giverDef == null || !bench.def.hasInteractionCell || bench.IsBurning()) return;
+            if (!billGiver.BillStack.AnyShouldDoNow || !billGiver.UsableForBillsAfterFueling()) return;
+            if (!pawn.CanReserve(bench, 1, -1, null, true) || !pawn.CanReserveSittableOrSpot(bench.InteractionCell, bench, true)) return;
+
+            var refuelable = bench.TryGetComp<CompRefuelable>();
+            if (refuelable != null && !refuelable.HasFuel) return;
+
+            var bills = billGiver.BillStack;
+            for (int i = 0; i < bills.Count; i++)
+            {
+                var bill = bills[i];
+                if (!BillWantsCarried(bill, carried)) continue;
+                if (!bill.CompletableEver || Find.TickManager.TicksGame <= bill.nextTickToSearchForIngredients) continue;
+                if (bill.recipe.requiredGiverWorkType != null && bill.recipe.requiredGiverWorkType != giverDef.workType) continue;
+                if (!bill.ShouldDoNow() || !bill.PawnAllowedToStartAnew(pawn) || bill.recipe.FirstSkillRequirementPawnDoesntSatisfy(pawn) != null) continue;
+
+                if (bill is Bill_ProductionWithUft uftBill)
+                {
+                    var uft = uftBill.BoundUft;
+                    if (uft != null && (uftBill.BoundWorker != pawn || uft.IsForbidden(pawn) || (uft != carried && !pawn.CanReserveAndReach(uft, PathEndMode.Touch, Danger.Deadly)))) continue;
+
+                    uft ??= carried is UnfinishedThing carriedUft && !carriedUft.IsForbidden(pawn) ? carriedUft : WorkGiver_DoBill.ClosestUnfinishedThingForBill(pawn, uftBill);
+                    if (uft != null)
+                    {
+                        if (BenchClear(billGiver, uft))
+                        {
+                            SetClickBill(bill, true);
+                            AddClickBillThing(uft, 1);
+                        }
+                        return;
+                    }
+                }
+                if (bill is Bill_Autonomous { State: not FormingState.Gathering })
+                {
+                    SetClickBill(bill, true);
+                    return;
+                }
+
+                if (HasIngredientsWithCarried(bill, bench, carried))
+                {
+                    if (!BenchClear(billGiver)) ClearClickBill();
+                    return;
+                }
+            }
+        }
+
+        private bool BenchClear(IBillGiver billGiver, Thing ignore = null)
+        {
+            foreach (var stackCell in billGiver.IngredientStackCells)
+            {
+                var item = pawn.Map.thingGrid.ThingAt(stackCell, ThingCategory.Item);
+                if (item != null && item != ignore) return false;
+            }
+            return true;
+        }
+
+        private bool HasIngredientsWithCarried(Bill bill, Thing bench, Thing carried)
+        {
+            float radius = PerspectiveShiftMod.settings.grabRange + 1.5f;
+            bool carriedCounts = !carried.IsForbidden(pawn) && WorkGiver_DoBill.IsUsableIngredient(carried, bill)
+                && (pawn.Position - bench.Position).LengthHorizontalSquared < radius * radius;
+            var rootCell = bench.InteractionCell;
+            try
+            {
+                bool found = WorkGiver_DoBill.TryFindBestIngredientsHelper(
+                    t => WorkGiver_DoBill.IsUsableIngredient(t, bill),
+                    candidates =>
+                    {
+                        depositCandidates.Clear();
+                        depositCandidates.AddRange(candidates);
+                        if (carriedCounts) depositCandidates.Add(carried);
+                        return WorkGiver_DoBill.TryFindBestBillIngredientsInSet(depositCandidates, bill, depositChosen, rootCell, false, null);
+                    },
+                    bill.recipe.ingredients, pawn, bench, depositChosen, radius);
+                if (!found) return false;
+
+                SetClickBill(bill, false);
+                for (int i = 0; i < depositChosen.Count; i++) AddClickBillThing(depositChosen[i].Thing, depositChosen[i].Count);
+                if (bill.xenogerm != null) AddClickBillThing(bill.xenogerm, 1);
+                return true;
+            }
+            finally
+            {
+                depositCandidates.Clear();
+                depositChosen.Clear();
+            }
         }
 
         private bool CanResearchAt(Thing thing)
