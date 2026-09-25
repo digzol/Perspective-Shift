@@ -57,6 +57,8 @@ namespace PerspectiveShift
         private Sustainer reelSustainer;
         private SoundDef reelSustainerDef;
 
+        private TimeSpeed prevTimeSpeed;
+
         private bool resolved;
         private bool won;
         private float resultTimer;
@@ -68,7 +70,6 @@ namespace PerspectiveShift
             fishDef = PSFishingUtility.PreviewFishDef(cell, pawn.Map);
             fishIcon = SingleItemIcon(fishDef);
 
-            forcePause = true;
             absorbInputAroundWindow = true;
             preventCameraMotion = true;
             closeOnClickedOutside = false;
@@ -96,10 +97,34 @@ namespace PerspectiveShift
 
         public override float Margin => 12f;
 
+        private bool CanKeepFishing => pawn != null && !pawn.Dead && !pawn.Downed && pawn.Spawned
+            && pawn.jobs?.curDriver is JobDriver_PSFishMinigame;
+
+        public override void PreOpen()
+        {
+            base.PreOpen();
+            var tickManager = Find.TickManager;
+            if (tickManager == null) return;
+            prevTimeSpeed = tickManager.CurTimeSpeed;
+            tickManager.CurTimeSpeed = TimeSpeed.Normal;
+        }
+
+        public override void WindowUpdate()
+        {
+            base.WindowUpdate();
+            var tickManager = Find.TickManager;
+            if (tickManager != null && tickManager.CurTimeSpeed != TimeSpeed.Normal)
+                tickManager.CurTimeSpeed = TimeSpeed.Normal;
+            if (!resolved && !CanKeepFishing) Close(false);
+        }
+
         public override void PreClose()
         {
             base.PreClose();
             StopReelLoop();
+            var tickManager = Find.TickManager;
+            if (tickManager != null && tickManager.CurTimeSpeed == TimeSpeed.Normal)
+                tickManager.CurTimeSpeed = prevTimeSpeed;
         }
 
         public override void DoWindowContents(Rect inRect)

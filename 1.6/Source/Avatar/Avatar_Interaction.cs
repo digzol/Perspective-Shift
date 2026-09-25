@@ -336,7 +336,7 @@ namespace PerspectiveShift
                 var amount = Mathf.Min(carriedThing.stackCount, refuelableComp.GetFuelCountToFullyRefuel());
                 refuelableComp.Refuel(amount);
                 carriedThing.SplitOff(amount).Destroy();
-                if (t.def.soundInteract != null) t.def.soundInteract.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map));
+                PlaySoundOnce(t.def.soundInteract, new TargetInfo(pawn.Position, pawn.Map));
                 return true;
             }
             return false;
@@ -377,7 +377,7 @@ namespace PerspectiveShift
                 TaleRecorder.RecordTale(TaleDefOf.Captured, pawn, carriedPawn);
             }
 
-            SoundDefOf.ChainToPlatform.PlayOneShot(new TargetInfo(holderComp.parent.Position, pawn.Map));
+            PlaySoundOnce(SoundDefOf.ChainToPlatform, new TargetInfo(holderComp.parent.Position, pawn.Map));
             return true;
         }
 
@@ -478,7 +478,7 @@ namespace PerspectiveShift
 
                 if (transferred > 0 || carriedThing.Destroyed || carriedThing.stackCount < countBefore || pawn.carryTracker.CarriedThing != carriedThing)
                 {
-                    sound?.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map));
+                    PlaySoundOnce(sound, new TargetInfo(pawn.Position, pawn.Map));
                     return true;
                 }
             }
@@ -680,8 +680,7 @@ namespace PerspectiveShift
 
             if (pickedUpCount > 0)
             {
-                if (target.def.soundPickup != null)
-                    target.def.soundPickup.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map));
+                PlaySoundOnce(target.def.soundPickup, new TargetInfo(pawn.Position, pawn.Map));
                 return true;
             }
             return false;
@@ -1075,6 +1074,21 @@ namespace PerspectiveShift
             return false;
         }
 
+        private static void PlaySoundOnce(SoundDef def, TargetInfo at)
+        {
+            if (def == null) return;
+            if (!def.sustain)
+            {
+                def.PlayOneShot(at);
+                return;
+            }
+            var info = SoundInfo.InMap(at);
+            for (int i = 0; i < def.subSounds.Count; i++)
+            {
+                def.subSounds[i].TryPlay(info);
+            }
+        }
+
         private static HashSet<ThingDef> watchBuildingDefs;
 
         private static bool IsWatchBuilding(ThingDef def)
@@ -1251,9 +1265,7 @@ namespace PerspectiveShift
                     return;
                 }
                 pawn.outfits?.forcedHandler.SetForced(apparel, true);
-                var sound = apparel.def.apparel.soundWear;
-                if (sound == null || sound.sustain) sound = apparel.def.soundInteract;
-                if (sound != null && !sound.sustain) sound.PlayOneShot(at);
+                PlaySoundOnce(apparel.def.apparel.soundWear ?? apparel.def.soundInteract, at);
                 return;
             }
             var eq = (ThingWithComps)taken;
@@ -1264,7 +1276,7 @@ namespace PerspectiveShift
                 GenPlace.TryPlaceThing(eq, pawn.Position, map, ThingPlaceMode.Near);
                 return;
             }
-            eq.def.soundInteract?.PlayOneShot(at);
+            PlaySoundOnce(eq.def.soundInteract, at);
         }
     }
 }

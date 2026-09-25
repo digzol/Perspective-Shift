@@ -100,6 +100,9 @@ namespace PerspectiveShift
         private static Texture2D _roofCursorTex;
         public static Texture2D RoofCursorTex => _roofCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Roof");
 
+        private static Texture2D _launchCursorTex;
+        public static Texture2D LaunchCursorTex => _launchCursorTex ??= ContentFinder<Texture2D>.Get("UI/CustomCursors/Launch");
+
         public bool HandleSelectorClick()
         {
             if (Find.Targeter.IsTargeting) return false;
@@ -449,6 +452,7 @@ namespace PerspectiveShift
             Slaughter,
             ReleaseToWild,
             Roof,
+            Launch,
         }
 
         private static Texture2D CursorTexFor(CursorJobHint hint)
@@ -480,6 +484,7 @@ namespace PerspectiveShift
                 case CursorJobHint.Slaughter: return SlaughterCursorTex;
                 case CursorJobHint.ReleaseToWild: return ReleaseToWildCursorTex;
                 case CursorJobHint.Roof: return RoofCursorTex;
+                case CursorJobHint.Launch: return LaunchCursorTex;
                 default: return MineCursorTex;
             }
         }
@@ -675,6 +680,17 @@ namespace PerspectiveShift
                 }
             }
 
+            if (settings.launchCursor)
+            {
+                for (int i = 0; i < things.Count; i++)
+                {
+                    if (!CanLaunchGravship(things[i])) continue;
+
+                    target = things[i];
+                    return CursorJobHint.Launch;
+                }
+            }
+
             if (settings.chopCursor || settings.harvestCursor || settings.cutCursor)
             {
                 var plant = cell.GetPlant(pawn.Map);
@@ -789,6 +805,16 @@ namespace PerspectiveShift
             if (!pawn.CanReach(thing, PathEndMode.OnCell, Danger.Deadly)) return false;
 
             return pawn.CanReserve(thing, 1, -1, null, true);
+        }
+
+        private bool CanLaunchGravship(Thing thing)
+        {
+            var console = thing.TryGetComp<CompPilotConsole>();
+            if (console == null) return false;
+            if (!console.CanUseNow().Accepted) return false;
+            if (!pawn.CanReach(thing, PathEndMode.InteractionCell, Danger.Deadly)) return false;
+
+            return (bool)console.ValidateNavigator(pawn);
         }
 
         private bool CanRepair(Thing thing)

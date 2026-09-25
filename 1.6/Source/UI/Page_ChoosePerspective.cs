@@ -17,9 +17,8 @@ namespace PerspectiveShift
             AuthenticOptions
         }
 
-        private const float RecommendedReserve = 26f;
         private const float RecommendedFlashDuration = 1.2f;
-        private const float RecommendedInlineGap = 8f;
+        private static readonly Color RecommendedColor = Color.white;
 
         private PageStep step = PageStep.Role;
         private bool roleIsCharacter = false;
@@ -100,7 +99,7 @@ namespace PerspectiveShift
             var iconRect = new Rect(rect.x, rect.y, rect.width, rect.width).ExpandedBy(21);
             GUI.DrawTexture(iconRect, icon, ScaleMode.ScaleToFit);
 
-            if (recommended) DrawRecommendedLabel(new Rect(contentRect.x, contentRect.y, contentRect.width, RecommendedReserve), TextAnchor.UpperCenter);
+            if (recommended) DrawRecommendedTag(rect);
 
             Text.Font = GameFont.Medium;
             Text.Anchor = TextAnchor.MiddleCenter;
@@ -115,15 +114,21 @@ namespace PerspectiveShift
             Text.Anchor = TextAnchor.UpperLeft;
         }
 
-        private void DrawRecommendedLabel(Rect rect, TextAnchor anchor)
+        private void DrawRecommendedTag(Rect cardRect)
         {
-            var grey = ColoredText.SubtleGrayColor;
-            Text.Font = GameFont.Small;
-            Text.Anchor = anchor;
-            GUI.color = Color.Lerp(grey, Color.white, RecommendedFlashIntensity());
-            Widgets.Label(rect, "PS_Recommended".Translate());
+            Text.Font = GameFont.Tiny;
+            Text.Anchor = TextAnchor.MiddleCenter;
+            var label = "PS_Recommended".Translate();
+            var size = Text.CalcSize(label);
+            var tagRect = new Rect(cardRect.xMax - size.x - 14f, cardRect.y - 9f, size.x + 14f, 18f);
+            GUI.color = Color.white;
+            Widgets.DrawBoxSolid(tagRect, Widgets.WindowBGFillColor);
+            GUI.color = Color.Lerp(RecommendedColor, Color.white, RecommendedFlashIntensity());
+            Widgets.DrawBox(tagRect);
+            Widgets.Label(tagRect, label);
             GUI.color = Color.white;
             Text.Anchor = TextAnchor.UpperLeft;
+            Text.Font = GameFont.Small;
         }
 
         private float RecommendedFlashIntensity()
@@ -199,12 +204,7 @@ namespace PerspectiveShift
             var titleRect = new Rect(textRect.x, textRect.y, textRect.width, 50f);
             GUI.Label(titleRect, label, titleStyle);
 
-            if (recommended)
-            {
-                var titleSize = titleStyle.CalcSize(new GUIContent(label));
-                float badgeX = titleRect.x + titleSize.x + RecommendedInlineGap;
-                DrawRecommendedLabel(new Rect(badgeX, titleRect.y, titleRect.xMax - badgeX, titleSize.y), TextAnchor.MiddleLeft);
-            }
+            if (recommended) DrawRecommendedTag(rect);
 
             Text.Font = GameFont.Small;
             var descRect = new Rect(textRect.x, titleRect.yMax + 5f, textRect.width, textRect.height - 55f);

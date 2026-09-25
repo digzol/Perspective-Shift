@@ -109,7 +109,7 @@ namespace PerspectiveShift
             }
             bool mouseOverGizmo = MapGizmoUtility.LastMouseOverGizmo != null || gizmoBounds.Contains(UI.MousePositionOnUIInverted);
             bool mouseOverUI = IsMouseOverUI() || IsMouseOverColonistBar();
-            DrawEquipHint(mouseOverUI || mouseOverGizmo);
+            DrawEquipHint(mouseOverUI || mouseOverGizmo || WorldRendererUtility.WorldSelected);
             DrawFishingAlert();
             HandleHoldToFire(mouseOverGizmo, mouseOverUI);
             UpdateCursorAndReticle(mouseOverGizmo, mouseOverUI);

@@ -18,7 +18,7 @@ namespace PerspectiveShift
         }
 
         private const int MinBiteTicks = 60;
-        private const int MaxBiteTicks = 1200;
+        private const int MaxBiteTicks = 1500;
         private const float ReactionWindow = 1.1f;
         private const float HitHold = 0.75f;
 

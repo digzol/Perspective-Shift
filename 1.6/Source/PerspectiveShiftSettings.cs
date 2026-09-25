@@ -81,6 +81,7 @@ namespace PerspectiveShift
         public bool slaughterCursor = true;
         public bool releaseToWildCursor = true;
         public bool roofCursor = true;
+        public bool launchCursor = true;
         public bool fishingMinigame = true;
         public bool instantEquip = true;
 
@@ -136,6 +137,7 @@ namespace PerspectiveShift
             Scribe_Values.Look(ref slaughterCursor, "slaughterCursor", true);
             Scribe_Values.Look(ref releaseToWildCursor, "releaseToWildCursor", true);
             Scribe_Values.Look(ref roofCursor, "roofCursor", true);
+            Scribe_Values.Look(ref launchCursor, "launchCursor", true);
             Scribe_Values.Look(ref fishingMinigame, "fishingMinigame", true);
             Scribe_Values.Look(ref instantEquip, "instantEquip", true);
             Scribe_Values.Look(ref enableSprinting, "enableSprinting", true);
